@@ -70,32 +70,32 @@ public class MutantsGenerator {
         }
        // Class c = Class.forName(class_name);
 
-				int class_type = MutationSystem.getClassType(class_name);
-				if(class_type==MutationSystem.NORMAL){
-				}else if(class_type==MutationSystem.MAIN){
-						System.out.println(" -- "  + file_name+ " class contains 'static void main()' method.");
-						System.out.println("    Pleas note that mutants are not generated for the 'static void main()' method");
-				}else{
-					 switch(class_type){
-					    case MutationSystem.MAIN :
-							        System.out.println(" -- Can't apply because " + file_name+ " contains only 'static void main()' method.");
-                      break;
-					    case MutationSystem.INTERFACE :
-							        System.out.println(" -- Can't apply because " + file_name+ " is 'interface' ");
-                      break;
-					    case MutationSystem.ABSTRACT :
-							        System.out.println(" -- Can't apply because " + file_name+ " is 'abstract' class ");
-										  break;
-					    case MutationSystem.APPLET :
-											System.out.println(" -- Can't apply because " + file_name+ " is 'applet' class ");
-											break;
-							case MutationSystem.GUI :
-											System.out.println(" -- Can't apply because " + file_name+ " is 'GUI' class ");
-											break;
-					 }
-					 deleteDirectory();
-					 continue;
-				}
+		int class_type = MutationSystem.getClassType(class_name);
+		if(class_type==MutationSystem.NORMAL){
+		}else if(class_type==MutationSystem.MAIN){
+				System.out.println(" -- "  + file_name+ " class contains 'static void main()' method.");
+				System.out.println("    Pleas note that mutants are not generated for the 'static void main()' method");
+		} else {
+			switch(class_type){
+				case MutationSystem.MAIN :
+					System.out.println(" -- Can't apply because " + file_name+ " contains only 'static void main()' method.");
+					break;
+				case MutationSystem.INTERFACE :
+					System.out.println(" -- Can't apply because " + file_name+ " is 'interface' ");
+					break;
+				case MutationSystem.ABSTRACT :
+					System.out.println(" -- Can't apply because " + file_name+ " is 'abstract' class ");
+					break;
+				case MutationSystem.APPLET :
+					System.out.println(" -- Can't apply because " + file_name+ " is 'applet' class ");
+					break;
+				case MutationSystem.GUI :
+					System.out.println(" -- Can't apply because " + file_name+ " is 'GUI' class ");
+					break;
+			}
+			 deleteDirectory();
+			 continue;
+		}
 
         // [2] Apply mutation testing
         setMutationSystemPathFor(file_name);
