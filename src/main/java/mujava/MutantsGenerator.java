@@ -46,7 +46,7 @@ public abstract class MutantsGenerator {
 	// private boolean debug = false;
 	// static int counter;
 	/** Java source file where mutation operators are applied to */
-	File original_file; // mutation�� ������ file
+	File original_file; // mutation file
 
 	/** mutation operators to apply */
 	String[] operators = null;
@@ -161,7 +161,8 @@ public abstract class MutantsGenerator {
 	 * 
 	 * @throws OpenJavaException
 	 */
-	private void initParseTree() throws OpenJavaException {
+//	private void initParseTree() throws OpenJavaException {
+	public void initParseTree() throws OpenJavaException {
 		try {
 			// System.out.println("OJSystem.env0 :" + OJSystem.env );
 			comp_unit.accept(new TypeNameQualifier(file_env));
@@ -197,7 +198,8 @@ public abstract class MutantsGenerator {
 	 * 
 	 * @throws OpenJavaException
 	 */
-	private void generateParseTree() throws OpenJavaException {
+//	private void generateParseTree() throws OpenJavaException {
+	public void generateParseTree() throws OpenJavaException {
 		try {
 			comp_unit = parse(original_file);
 
@@ -205,10 +207,13 @@ public abstract class MutantsGenerator {
 
 			if (pubcls_name == null) {
 				int len = original_file.getName().length();
-				pubcls_name = original_file.getName().substring(0, len - 6);
+				// This seems to intend to remove file extension
+				// Fixed bug where it removed more than it needed
+				String original_file_name = original_file.getName();
+				pubcls_name = original_file.getName().substring(0, original_file_name.indexOf('.'));
 			}
 
-			file_env = new FileEnvironment(OJSystem.env, comp_unit, pubcls_name);
+			file_env = new FileEnvironment(OJSystem.env, comp_unit.getPackage(), pubcls_name, original_file);
 			ClassDeclarationList typedecls = comp_unit.getClassDeclarations();
 
 			for (int j = 0; j < typedecls.size(); ++j) {
