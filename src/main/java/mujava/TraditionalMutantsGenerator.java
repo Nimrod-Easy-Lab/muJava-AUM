@@ -70,7 +70,12 @@ public class TraditionalMutantsGenerator extends MutantsGenerator {
 		super(f);
 		traditionalOp = tOP;
 	}
-
+   /**
+    * Mutant engine constructor
+    * @param f The java file that will be mutated
+	* @param tOP String array of traditional mutants operators, i.e ["ROR","LOR","LOI"]
+	* @param allOperators Which operators have been selected
+    */
 	public TraditionalMutantsGenerator(File f, String[] tOP, List<String> allOperators) {
 		super(f);
 		traditionalOp = tOP;
@@ -169,7 +174,7 @@ public class TraditionalMutantsGenerator extends MutantsGenerator {
 						out.flush();
 						out.close();
 					} catch (Exception e) {
-						System.err.println("Error in writing method list");
+						System.err.println("Error in writing method list.\nReason: " + e.getMessage());
 						return;
 					}
 
