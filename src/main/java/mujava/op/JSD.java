@@ -17,9 +17,12 @@ package mujava.op;
 
 import java.io.*;
 import java.util.Vector;
+
+import mujava.op.util.LogReduction;
 import openjava.mop.*;
 import openjava.ptree.*;
 import mujava.MutationSystem;
+import sun.tools.tree.FieldExpression;
 
 /**
  * <p>Generate JSD (Java-specific static modifier deletion) --
@@ -55,7 +58,7 @@ public class JSD extends mujava.op.util.Mutator
 
    public void visit( FieldDeclaration p ) throws ParseTreeException 
    {
-      if (p.getModifiers().contains(ModifierList.STATIC))
+      if (p.getModifiers().contains(ModifierList.STATIC) && !isEquivalent(p))
       {
          staticFields.add(p);
       }
@@ -113,5 +116,26 @@ public class JSD extends mujava.op.util.Mutator
 	     System.err.println( "errors during printing " + f_name );
 	     e.printStackTrace();
       }
+   }
+
+   public boolean isEquivalent(FieldDeclaration fieldDeclaration) {
+       /*
+        "term = private static final type := value;
+        transformations = {
+          JSD(static) = ;
+        }
+        constraints = {
+
+        }"
+        */
+      boolean e_rule_22 = false;
+      if (fieldDeclaration.getModifiers().contains(ModifierList.PRIVATE) &&
+          fieldDeclaration.getModifiers().contains(ModifierList.STATIC) &&
+          fieldDeclaration.getModifiers().contains(ModifierList.FINAL) &&
+          fieldDeclaration.getTypeSpecifier().equals(String.class)) {
+         e_rule_22 = LogReduction.AVOID;
+         System.out.println("JSD E22 rule for expression >>>>" + fieldDeclaration.toFlattenString());
+      }
+      return e_rule_22;
    }
 }
