@@ -49,6 +49,19 @@ public class Arithmetic_OP extends MethodLevelMutator
       return false;
    }
 
+    /**
+    * Determine whether a given expression is a variable assignment expression
+    * @param p
+    * @return
+    * @throws ParseTreeException
+    */
+   public boolean isVariableAssignmentExpression(Expression p) throws ParseTreeException {
+   	  if (p instanceof AssignmentExpression) {
+   	     return true;
+      }
+      return false;
+   }
+
    /**
     * Determine whether a given expression has a binary arithmetic operator
     * @param p
