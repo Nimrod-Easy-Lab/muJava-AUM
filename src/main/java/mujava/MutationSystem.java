@@ -25,8 +25,7 @@ import mujava.util.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.*;
 import java.util.Collections;
 import java.util.Vector;
 
@@ -47,8 +46,10 @@ import java.util.Vector;
  *                 and applet.   
  *        
  * @author Yu-Seung Ma
- * @update by Nan Li May 2012 
+ * @update by Nan Li May 2012
+ * @update by Pedro Pinheiro 2019
  * @new function addURL:  classes are added to the CLASSPATH dynamically so that users do not need to set up the CLASSPATH manually any more
+ * @new introduced setJMutationStructureFromArg to allow configuration without mujava.config file
  * @version 1.0
   */
 
@@ -157,7 +158,7 @@ public class MutationSystem extends OJSystem
    
  /**
    * Return type of class.
-   * @param name of class
+   * @param class_name name of class
    * @return type of class ( types: interface, abstract, GUI, main, normal, applet )
    */
    public static int getClassType (String class_name)
@@ -562,7 +563,7 @@ public class MutationSystem extends OJSystem
 		}
 
   /** Re-setting MuJava structure for give class name <br>
-   * @param name of class (including package name) */
+   * @param whole_class_name name of class (including package name) */
    public static void setJMutationPaths(String whole_class_name)
    {
       int temp_start = whole_class_name.lastIndexOf(".") + 1;
@@ -610,6 +611,24 @@ public class MutationSystem extends OJSystem
       {
          e.printStackTrace();
       }
+   }
+
+   public static void setJMutationStructureFromFilePath(String path) throws FileNotFoundException {
+       if (path.length() <= 0) throw new FileNotFoundException();
+       File file_ref = new File(path);
+        if (file_ref.exists()) {
+            setJMutationStructure(path);
+        }
+        else {
+            path = MutationSystem.SYSTEM_HOME + path;
+            file_ref = new File(path);
+            if (file_ref.exists()) {
+                setJMutationStructure(path);
+            }
+            else {
+                throw  new FileNotFoundException();
+            }
+        }
    }
 
   /** <p> Recognize file structure for mutation system from not "mujava.config" but from user directly </p>*/
