@@ -64,24 +64,30 @@ public class GenMutantsMain extends JFrame
    { 
       System.out.println("The main method starts");
       try {
-	  MutationSystem.setJMutationStructure();
+//		  MutationSystem.setJMutationStructure();
+          if (args.length > 0) {
+             MutationSystem.setJMutationStructureFromFilePath(args[0]);
+          }
+          else {
+             MutationSystem.setJMutationStructure();
+          }
       }
       catch (NoClassDefFoundError e) {
-	  System.err.println("[ERROR] Could not find one of the classes necessary to run muJava. Make sure that the .jar file for openjava is in your classpath.");
-	  System.err.println();
-	  e.printStackTrace();
-	  return;
+		  System.err.println("[ERROR] Could not find one of the classes necessary to run muJava. Make sure that the .jar file for openjava is in your classpath.");
+		  System.err.println();
+		  e.printStackTrace();
+		  return;
       }
       MutationSystem.recordInheritanceRelation();
       GenMutantsMain main = new GenMutantsMain();
       try {
-	  main.pack();
+		  main.pack();
       }
       catch (NullPointerException e) {
-	  System.err.println("[ERROR] An error occurred while initializing muJava. This may have happened because the files used by muJava are in an unexpected state. Try deleting any uncompiled mutants that were generated in the result/ directory, and then re-generate them.");
-	  System.err.println();
-	  e.printStackTrace();
-	  return;
+		  System.err.println("[ERROR] An error occurred while initializing muJava. This may have happened because the files used by muJava are in an unexpected state. Try deleting any uncompiled mutants that were generated in the result/ directory, and then re-generate them.");
+		  System.err.println();
+		  e.printStackTrace();
+		  return;
       }
       main.setVisible(true);
    } 
