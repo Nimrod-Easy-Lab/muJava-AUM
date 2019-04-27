@@ -13,7 +13,7 @@ import java.util.List;
 public class LogReduction {
 	public static final String LOGGER_NAME = "nimrod";
 	public static final String DEFAULT_PATH = ".";
-	public static final boolean AVOID = false;
+	public static final boolean AVOID = true;
 	
 	
 	/**
