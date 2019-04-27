@@ -27,10 +27,9 @@ import java.io.*;
   */ 
 
 public final class Debug {
-
-    final static int DETAILED_LEVEL = 2;
-    final static int SIMPLE_LEVEL = 1;
-    final static int EMPTY_LEVEL = 0;
+   public final static int DETAILED_LEVEL = 2;
+   public final static int SIMPLE_LEVEL = 1;
+   public final static int EMPTY_LEVEL = 0;
 
     private static int debugLevel = 0;
 
@@ -168,6 +167,9 @@ public final class Debug {
     /** Print a String. */
     public static void println2( String s ) {
         if (debugLevel > SIMPLE_LEVEL)  out.println( s );
+    }
+    public static void println3( String s ) {
+        if (debugLevel > DETAILED_LEVEL)  out.println( s );
     }
 
     /** Print an Object, and then finish the line. */
