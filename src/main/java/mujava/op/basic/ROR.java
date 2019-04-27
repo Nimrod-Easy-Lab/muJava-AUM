@@ -15,13 +15,16 @@
  */
 package mujava.op.basic;
 
+import mujava.util.Debug;
 import openjava.mop.*;
 import openjava.ptree.*;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.List;
 
 import mujava.op.basic.SDL.SDLMutations;
 import mujava.op.util.LogReduction;
+import openjava.ptree.util.ParseTreeVisitor;
 
 /**
  * <p>
@@ -73,7 +76,181 @@ public class ROR extends Arithmetic_OP {
 		}
 	}
 
+	boolean isEquivalent(BinaryExpression exp, int op1, int op2) {
+		Debug.println("Checking if is equivalent.");
+
+		boolean e_rule_13 = false;
+		boolean e_rule_17 = false;
+		boolean e_rule_20 = false;
+		boolean e_rule_23 = false;
+
+		/*
+			ROR E-Rule 13
+			term = if (vArgs.length op1 0)
+			vArgs is string or array
+			ROR(op1) -> op2
+			when op1 is != and op2 is <
+			when op1 is != and op2 is >
+			when op1 is > and op2 is !=
+			when op1 is < and op2 is !=
+			when op1 is == and op2 is <=
+
+			>>>>>
+		*/
+
+		ExpressionAnalyzer aexp = new ExpressionAnalyzer(exp, this.getEnvironment());
+		if (aexp.isInsideIf()) {
+			if (aexp.containsZeroLiteral() && (aexp.containsLengthMethodCall() &&
+					(aexp.containsString() || aexp.containsArray())) ){
+				switch (aexp.getRootOperator()) {
+					case DIFFERENT:
+						if (op2 == BinaryExpression.LESS || (op2 == BinaryExpression.GREATER)) {
+							e_rule_13 = LogReduction.AVOID;
+							System.out.println("E-Rule 13 >>>> " + exp.toString() + " op2: " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+						}
+						break;
+					case GREATER:
+						if (op2 == BinaryExpression.NOTEQUAL) {
+							e_rule_13 = LogReduction.AVOID;
+							System.out.println("E-Rule 13 >>>> " + exp.toString() + " op2: " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+						}
+						break;
+					case LESSER:
+						if (op2 == BinaryExpression.NOTEQUAL) {
+							e_rule_13 = LogReduction.AVOID;
+							System.out.println("E-Rule 13 >>>> " + exp.toString() + " op2: " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+						}
+						break;
+					case EQUALS:
+						if (op2 == BinaryExpression.LESSEQUAL) {
+							e_rule_13 = LogReduction.AVOID;
+							System.out.println("E-Rule 13 >>>> " + exp.toString() + " op2: " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+						}
+						break;
+					default:
+						break;
+				}
+			}
+
+        /*    ERULE 20
+		 *   "term = if (v1 op1 v2) { v1 := v2 };
+		 *   transformations = {
+		 *     ROR(op1) = op2
+		 *   }
+		 *   constraints = {
+		 *      v1 and v2 hold a primitive data type,
+		 *      op1 ∈ {<} and op2 ∈ {<=} or op1 ∈ {>} and op2 ∈ {>=},
+		 *   }"
+		 */
+			//TODO: test for activation
+			else if (aexp.getRight() instanceof Variable && (aexp.getLeft() instanceof Variable)) {
+				IfStatement parent = (IfStatement) exp.getParent();
+				StatementList statementList = parent.getStatements();
+				for (int index = 0; index < statementList.size(); ++index) {
+					Statement statement = statementList.get(index);
+					if (statement instanceof ExpressionStatement) {
+						ExpressionStatement es = (ExpressionStatement) statement;
+						if (es.getExpression() instanceof AssignmentExpression) {
+							AssignmentExpression ase = (AssignmentExpression) es.getExpression();
+							if ((ase.getRight() instanceof Variable) && (ase.getLeft() instanceof Variable)) {
+							    if (ase.getRight().equals(aexp.getRight()) && ase.getLeft().equals(aexp.getLeft())) {
+									ExpressionAnalyzer.BinaryOperator top2 = ExpressionAnalyzer.translateFromBinaryExpression(op2);
+									if ((aexp.getRootOperator() == ExpressionAnalyzer.BinaryOperator.LESSER &&
+										top2 == ExpressionAnalyzer.BinaryOperator.LESSEREQUAL) ||
+											(aexp.getRootOperator() == ExpressionAnalyzer.BinaryOperator.GREATER) &&
+										top2 == ExpressionAnalyzer.BinaryOperator.GREATEREQUAL) {
+										//ACTIVATE RULE
+										System.out.println("ROR-E20");
+										e_rule_20 = LogReduction.AVOID;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			/* ROR E-Rule 23
+                "term = if (v op1 value) { ... };
+                transformations = {
+                  ROR(op1) = op2
+                }
+                constraints = {
+                   value == Integer.MAX_VALUE and op1 ∈ {==} and op2 ∈ {>=} or
+                   value == Integer.MIN_VALUE and op1 ∈ {==} and op2 ∈ {<=}
+                }"
+			 */
+			else if (((aexp.getRight() instanceof Variable) && (aexp.getLeft() instanceof FieldAccess)) ||
+                        ((aexp.getRight() instanceof FieldAccess) && (aexp.getLeft() instanceof Variable))) {
+				Variable variable = null;
+				FieldAccess fieldAccess = null;
+				if (aexp.getLeft() instanceof Variable) {
+				    variable = (Variable) aexp.getLeft();
+				} else if (aexp.getLeft() instanceof FieldAccess) {
+					fieldAccess = (FieldAccess) aexp.getLeft();
+				}
+                if (aexp.getRight() instanceof Variable) {
+				    variable = (Variable) aexp.getRight();
+				} else if (aexp.getRight() instanceof FieldAccess) {
+					fieldAccess = (FieldAccess) aexp.getRight();
+				}
+
+				if ((variable != null) && (fieldAccess != null)) {
+					if (fieldAccess.getReferenceType() != null ) {
+						if (fieldAccess.getReferenceType().getName().equals("Integer")) {
+							if (fieldAccess.getName().equals("MAX_VALUE")) {
+								if (((op1 == BinaryExpression.EQUAL) && (op2 == BinaryExpression.GREATEREQUAL)) ||
+										((op1 == BinaryExpression.EQUAL) && (op2 == BinaryExpression.LESSEQUAL))) {
+									e_rule_23 = LogReduction.AVOID;
+									System.out.println("ROR E23 >>>>> " + exp.toFlattenString());
+								}
+							}
+						}
+					}
+				}
+
+			}
+
+		}
+        /*
+            ROR E-Rule 17
+            term = for (int v1 := 0; v1 op1 vArray.length; v1++){ ... }
+            transformations = {
+              ROR(op1) = op2
+            }
+            constraints = {
+               op1 ∈ {<} and op2 ∈ {!=} or op1 ∈ {!=} and op2 ∈ {<},
+               There is no definition of v1 within the for body
+            }
+         */
+
+        else if (aexp.isInsideFor() && aexp.isForIteratorStartsAtZero() &&
+                aexp.isForIteratorIncrements() && aexp.containsArray() && aexp.containsLengthMethodCall()) {
+            //TODO: check if v1 is 'defined within for statement block' according to ROR E-Rule 17
+            switch (aexp.getRootOperator()) {
+                case LESSER:
+                    if (op2 == BinaryExpression.NOTEQUAL){
+                        e_rule_17 = LogReduction.AVOID;
+						System.out.println("E-Rule 17 >>>> " + exp.toString());
+                    }
+                    break;
+                case DIFFERENT:
+                    if (op2 == BinaryExpression.LESS){
+                        e_rule_17 = LogReduction.AVOID;
+						System.out.println("E-Rule 17 >>>> " + exp.toString());
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+		return e_rule_13 || e_rule_17 || e_rule_20 || e_rule_23;
+	}
+
 	private void primitiveRORMutantGen(BinaryExpression exp, int op) {
+
 		BinaryExpression mutant;
 
 		/**
@@ -83,7 +260,8 @@ public class ROR extends Arithmetic_OP {
 		if (op != BinaryExpression.GREATER) {
 			mutant = (BinaryExpression) (exp.makeRecursiveCopy());
 			mutant.setOperator(BinaryExpression.GREATER);
-			if (!isDuplicated(exp, mutant)) {
+			int op2 = BinaryExpression.GREATER;
+			if (!isDuplicated(exp, mutant) && !isEquivalent(exp,op,op2)) {
 				outputToFile(exp, mutant);
 			}
 		}
@@ -91,7 +269,8 @@ public class ROR extends Arithmetic_OP {
 		if (op != BinaryExpression.GREATEREQUAL) {
 			mutant = (BinaryExpression) (exp.makeRecursiveCopy());
 			mutant.setOperator(BinaryExpression.GREATEREQUAL);
-			if (!isDuplicated(exp, mutant)) {
+			int op2 = BinaryExpression.GREATEREQUAL;
+			if (!isDuplicated(exp, mutant) && !isEquivalent(exp,op,op2)) {
 				outputToFile(exp, mutant);
 			}
 		}
@@ -99,7 +278,8 @@ public class ROR extends Arithmetic_OP {
 		if (op != BinaryExpression.LESS) {
 			mutant = (BinaryExpression) (exp.makeRecursiveCopy());
 			mutant.setOperator(BinaryExpression.LESS);
-			if (!isDuplicated(exp, mutant)) {
+			int op2 = BinaryExpression.LESS;
+			if (!isDuplicated(exp, mutant) && !isEquivalent(exp,op,op2)) {
 				outputToFile(exp, mutant);
 			}
 		}
@@ -107,7 +287,8 @@ public class ROR extends Arithmetic_OP {
 		if (op != BinaryExpression.LESSEQUAL) {
 			mutant = (BinaryExpression) (exp.makeRecursiveCopy());
 			mutant.setOperator(BinaryExpression.LESSEQUAL);
-			if (!isDuplicated(exp, mutant)) {
+			int op2 = BinaryExpression.LESSEQUAL;
+			if (!isDuplicated(exp, mutant) && !isEquivalent(exp,op,op2)) {
 				outputToFile(exp, mutant);
 			}
 		}
@@ -115,7 +296,8 @@ public class ROR extends Arithmetic_OP {
 		if (op != BinaryExpression.EQUAL) {
 			mutant = (BinaryExpression) (exp.makeRecursiveCopy());
 			mutant.setOperator(BinaryExpression.EQUAL);
-			if (!isDuplicated(exp, mutant)) {
+			int op2 = BinaryExpression.EQUAL;
+			if (!isDuplicated(exp, mutant) && !isEquivalent(exp,op,op2)) {
 				outputToFile(exp, mutant);
 			}
 		}
@@ -123,7 +305,8 @@ public class ROR extends Arithmetic_OP {
 		if (op != BinaryExpression.NOTEQUAL) {
 			mutant = (BinaryExpression) (exp.makeRecursiveCopy());
 			mutant.setOperator(BinaryExpression.NOTEQUAL);
-			if (!isDuplicated(exp, mutant)) {
+			int op2 = BinaryExpression.NOTEQUAL;
+			if (!isDuplicated(exp, mutant) && !isEquivalent(exp,op,op2)) {
 				outputToFile(exp, mutant);
 			}
 		}
@@ -317,8 +500,8 @@ public class ROR extends Arithmetic_OP {
 	/**
 	 * Avoid generate duplicated mutants
 	 * 
-	 * @param statement
-	 * @param mutation
+	 * @param exp
+	 * @param mutant
 	 * @return
 	 * @throws ParseTreeException
 	 */
