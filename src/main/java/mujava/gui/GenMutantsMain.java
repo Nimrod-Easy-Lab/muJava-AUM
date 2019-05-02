@@ -64,13 +64,7 @@ public class GenMutantsMain extends JFrame
    { 
       System.out.println("The main method starts");
       try {
-//		  MutationSystem.setJMutationStructure();
-          if (args.length > 0) {
-             MutationSystem.setJMutationStructureFromFilePath(args[0]);
-          }
-          else {
-             MutationSystem.setJMutationStructure();
-          }
+         MutationSystem.setJMutationStructure();
       }
       catch (NoClassDefFoundError e) {
 		  System.err.println("[ERROR] Could not find one of the classes necessary to run muJava. Make sure that the .jar file for openjava is in your classpath.");
