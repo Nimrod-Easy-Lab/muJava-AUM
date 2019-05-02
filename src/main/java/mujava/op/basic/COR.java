@@ -15,9 +15,11 @@
  */ 
 package mujava.op.basic;
 
+import mujava.op.util.LogReduction;
 import openjava.mop.*;
 import openjava.ptree.*;
 import java.io.*;
+import java.util.ArrayList;
 
 /**
  * <p>Generate COR (Conditional Operator Replacement mutants --
@@ -31,9 +33,17 @@ import java.io.*;
 
 public class COR extends MethodLevelMutator
 {
+   private java.util.List<String> allOperatorsSelected;
    public COR(FileEnvironment file_env, ClassDeclaration cdecl, CompilationUnit comp_unit)
    {
       super( file_env, comp_unit );
+      allOperatorsSelected = new ArrayList<>();
+   }
+
+   public COR(FileEnvironment file_env, ClassDeclaration cdecl, CompilationUnit comp_unit,
+          java.util.List<String> allOperatorsSelected) {
+      this(file_env, cdecl, comp_unit);
+      this.allOperatorsSelected = allOperatorsSelected;
    }
 
    /**
@@ -118,4 +128,6 @@ public class COR extends MethodLevelMutator
 		 e.printStackTrace();
       }
    }
+
+
 }

@@ -150,9 +150,6 @@ public class AORS extends MethodLevelMutator
       }
    }
 
-   public boolean isEquivalent(Expression expression) {
 
-      return false;
-   }
 
 }

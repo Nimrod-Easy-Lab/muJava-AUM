@@ -135,14 +135,65 @@ public class LOI extends Arithmetic_OP {
 	
 	/**
 	 * Avoid generate duplicated mutants
-	 * 
+	 *
 	 * @param exp
-	 * @param mutation
+	 * @return
+	 */
+	private boolean isDuplicated_d49(Expression exp) {
+        boolean d_loi49 = false;
+		try {
+			int limit = 3;
+			ParseTreeObject treeNode = (ParseTreeObject) exp.makeRecursiveCopy();
+			treeNode = treeNode.getParent();
+			BinaryExpression binaryExpression = null;
+
+			//Go up in the tree until we go over limit, find an IfStatement parent or no parent at all
+			while ((limit > 0) && !(treeNode instanceof IfStatement) && (treeNode != null)) {
+				limit--;
+				if (treeNode instanceof BinaryExpression) binaryExpression = (BinaryExpression) treeNode;
+				treeNode = treeNode.getParent();
+			}
+
+			if (treeNode instanceof IfStatement && (binaryExpression != null)) {
+				ExpressionAnalyzer expressionAnalyzer =
+						new ExpressionAnalyzer(binaryExpression,this.getEnvironment());
+				// containsLengthMethodCall also tests for field access
+				if (expressionAnalyzer.containsZeroLiteral() &&
+						expressionAnalyzer.containsLengthMethodCall()
+						&& (expressionAnalyzer.containsArray() || expressionAnalyzer.containsString())) {
+				    switch (expressionAnalyzer.getRootOperator()) {
+						case LESSER:
+						case LESSEREQUAL:
+						case EQUALS:
+							if (allOperatorsSelected.contains("ROR")) {
+							    String desc = exp.toFlattenString();
+							    logReduction("LOI","ROR", desc);
+								d_loi49 = true;
+							}
+                        break;
+					}
+				}
+			}
+		} catch (Exception ignored) {
+
+		}
+		return d_loi49;
+    }
+
+    /**
+	 * Avoid generate duplicated mutants
+	 *
+	 * @param exp
 	 * @return
 	 */
 	private boolean isDuplicated(Expression exp) {
+
+
 		// #Rule 1: LOI x LOI (Apply LOI in a variable in IF conditional)
 		// Eg.: if(x != y){...} => [LOI] if(~x != y); [LOI] if(x != ~y);
+		boolean d_rule_49 = isDuplicated_d49(exp);
+		if (d_rule_49) return LogReduction.AVOID;
+
 		if (exp instanceof Variable) {
 			Variable v = (Variable)exp;
 			if(v.getParent() instanceof BinaryExpression){

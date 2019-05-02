@@ -56,8 +56,9 @@ public class AORB extends Arithmetic_OP {
 
 		Expression right = p.getRight();
 		right.accept(this);
-
+		if (isEquivalent(p)) return;
 		if (isArithmeticType(p)) {
+
 			int op_type = p.getOperator();
 			switch (op_type) {
 			// for AOR mutation operator
@@ -145,6 +146,7 @@ public class AORB extends Arithmetic_OP {
 			out.close();
 		} catch (IOException e) {
 			System.err.println("fails to create " + f_name);
+			System.err.println("Reason: " + e.getMessage());
 		} catch (ParseTreeException e) {
 			System.err.println("errors during printing " + f_name);
 			e.printStackTrace();
@@ -196,5 +198,54 @@ public class AORB extends Arithmetic_OP {
 
 		return false;
 	}
+
+     public boolean isEquivalent(BinaryExpression binaryExpression) {
+		 boolean erule21 = false;
+      /* E-Rule 21
+        "term = StringBuilder v1 = new StringBuilder(v2 op1 2);
+        transformations = {
+          AOR(op1) = op2
+        }
+        constraints = {
+           v1 and v2 hold a primitive data type,
+           op1 ∈ {+, -, *, /, %}
+        }"
+       */
+		 int limit = 5;
+		 ParseTreeObject checked = binaryExpression.getParent();
+		 while ((limit > 0) && (checked != null) && !( checked instanceof AllocationExpression) ) {
+			 limit--;
+			 checked =  checked.getParent();
+		 }
+
+		 if (checked instanceof AllocationExpression) {
+		 	 AllocationExpression allocationExpression = (AllocationExpression) checked;
+		 	 String allocationExpressionName = allocationExpression.getClassType().getName();
+		 	 if (allocationExpressionName.equals("java.lang.StringBuilder")) {
+				 ExpressionList allocationExpressionList = allocationExpression.getArguments();
+				 if (allocationExpressionList.get(0) instanceof BinaryExpression) {
+					 BinaryExpression mainBinaryExpression = (BinaryExpression) allocationExpressionList.get(0);
+					 ExpressionAnalyzer analyzer = new ExpressionAnalyzer(mainBinaryExpression,
+							 this.getEnvironment());
+					 if (!analyzer.containsString())
+					 {
+						 switch (mainBinaryExpression.getOperator()) {
+							 case BinaryExpression.TIMES:
+							 case BinaryExpression.DIVIDE:
+							 case BinaryExpression.MOD:
+							 case BinaryExpression.PLUS:
+							 case BinaryExpression.MINUS:
+								 erule21 = LogReduction.AVOID;
+								 System.out.println("[TOUCHDOWN] AORB->ERULE21 >>>>> "
+										 + allocationExpression.toFlattenString());
+								 break;
+						 }
+					 }
+				 }
+			 }
+		 }
+
+		 return erule21;
+   }
 
 }

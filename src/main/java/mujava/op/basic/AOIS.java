@@ -25,27 +25,7 @@ import java.util.Stack;
 import mujava.op.util.ContextInfo;
 import mujava.op.util.LogReduction;
 import openjava.mop.FileEnvironment;
-import openjava.ptree.AssignmentExpression;
-import openjava.ptree.BinaryExpression;
-import openjava.ptree.ClassDeclaration;
-import openjava.ptree.CompilationUnit;
-import openjava.ptree.DoWhileStatement;
-import openjava.ptree.Expression;
-import openjava.ptree.FieldAccess;
-import openjava.ptree.ForStatement;
-import openjava.ptree.List;
-import openjava.ptree.MethodDeclaration;
-import openjava.ptree.NonLeaf;
-import openjava.ptree.Parameter;
-import openjava.ptree.ParameterList;
-import openjava.ptree.ParseTreeException;
-import openjava.ptree.ReturnStatement;
-import openjava.ptree.Statement;
-import openjava.ptree.StatementList;
-import openjava.ptree.UnaryExpression;
-import openjava.ptree.Variable;
-import openjava.ptree.VariableDeclaration;
-import openjava.ptree.WhileStatement;
+import openjava.ptree.*;
 
 /**
  * <p>
@@ -66,6 +46,7 @@ public class AOIS extends Arithmetic_OP {
 		POSINCREMENT_INSERTION, POSDECREMENT_INSERTION, PREINCREMENT_INSERTION, PREDECREMENT_INSERTION;
 	}
 
+	
 	private ContextInfo contextInfo;
 	boolean isPrePostEQ = true;
 	private boolean isInsideAReturnStatement;
@@ -74,7 +55,6 @@ public class AOIS extends Arithmetic_OP {
 
 	ArrayList<Variable> lastReferenceOfAVariableInReturn = new ArrayList<Variable>();
 	ArrayList<Variable> lastReferenceOfAVariableInMethod = new ArrayList<Variable>();
-	ArrayList<Variable> lastReferenceOfAVariableInLoop = new ArrayList<Variable>();
 
 	private java.util.List<String> allOperatorsSelected;
 
@@ -144,7 +124,7 @@ public class AOIS extends Arithmetic_OP {
 				if (obj instanceof NonLeaf) {
 					NonLeaf nl = (NonLeaf) obj;
 					if (nl instanceof VariableDeclaration) {
-						this.methodLocalVariables.add(((VariableDeclaration) nl).getVariable());
+						this.localVariables.add(((VariableDeclaration) nl).getVariable());
 					}
 					checkVariables(nl.getContents(), variables);
 				} else if (obj instanceof List) {
@@ -173,8 +153,8 @@ public class AOIS extends Arithmetic_OP {
 		// uniqueVars.add(var.toString());
 		// }
 		// }
-		if (methodLocalVariables != null) {
-			for (String unique : methodLocalVariables) {
+		if (localVariables != null) {
+			for (String unique : localVariables) {
 				Variable lastReference = null;
 				for (Variable var : variables) {
 					if (var.toString().equals(unique)) {
@@ -189,7 +169,7 @@ public class AOIS extends Arithmetic_OP {
 		isInsideAReturnStatement = false;
 	}
 
-	ArrayList<String> methodLocalVariables = new ArrayList<String>();
+	ArrayList<String> localVariables = new ArrayList<String>();
 
 	@Override
 	public void visit(MethodDeclaration p) throws ParseTreeException {
@@ -199,7 +179,7 @@ public class AOIS extends Arithmetic_OP {
 		}
 
 		isInsideAMethod = true;
-		methodLocalVariables = new ArrayList<String>();
+		localVariables = new ArrayList<String>();
 		ArrayList<Variable> variables = new ArrayList<Variable>();
 		StatementList stmtList = p.getBody();
 		// add parameters as local variables
@@ -207,7 +187,7 @@ public class AOIS extends Arithmetic_OP {
 		if (paramList != null && paramList.size() > 0) {
 			for (int i = 0; i < paramList.size(); i++) {
 				Parameter param = paramList.get(0);
-				methodLocalVariables.add(param.getVariable());
+				localVariables.add(param.getVariable());
 			}
 		}
 		if (stmtList != null && stmtList.size() > 0) {
@@ -215,17 +195,17 @@ public class AOIS extends Arithmetic_OP {
 				Statement stmt = stmtList.get(i);
 				if (stmt instanceof VariableDeclaration) {
 					VariableDeclaration vd = (VariableDeclaration) stmt;
-					methodLocalVariables.add(vd.getVariable());
+					localVariables.add(vd.getVariable());
 				}
 
-				if (stmt instanceof NonLeaf) { // verificar todos os usos da variavel
+				if (stmt instanceof NonLeaf) {
 					NonLeaf nl = (NonLeaf) stmt;
 					checkVariables(nl.getContents(), variables);
 				}
 			}
 		}
 
-		for (String unique : methodLocalVariables) {
+		for (String unique : localVariables) {
 			Variable lastReference = null;
 			for (Variable var : variables) {
 				if (var.toString().equals(unique)) {
@@ -236,65 +216,27 @@ public class AOIS extends Arithmetic_OP {
 		}
 
 		super.visit(p);
-		methodLocalVariables = null;
+		localVariables = null;
 		isInsideAMethod = false;
-	}
-
-	private ArrayList<String> loopLocalVariables = new ArrayList<String>();
-
-	private void visitingLoops(StatementList stmtList) {
-		ArrayList<Variable> variables = new ArrayList<Variable>();
-		loopLocalVariables = new ArrayList<String>();
-		// Add variables declared inside a loop
-		if (stmtList != null && stmtList.size() > 0) {
-			for (int i = 0; i < stmtList.size(); i++) {
-				Statement stmt = stmtList.get(i);
-				if (stmt instanceof VariableDeclaration) {
-					VariableDeclaration vd = (VariableDeclaration) stmt;
-					loopLocalVariables.add(vd.getVariable());
-				}
-				// Adiciona todos os usos da variavel
-				if (stmt instanceof NonLeaf) { 
-					NonLeaf nl = (NonLeaf) stmt;
-					checkVariables(nl.getContents(), variables);
-				}
-			}
-		}
-
-		for (String unique : loopLocalVariables) {
-			Variable lastReference = null;
-			for (Variable var : variables) {
-				if (var.toString().equals(unique)) {
-					lastReference = var;
-				}
-			}
-			lastReferenceOfAVariableInLoop.add(lastReference);
-		}
 	}
 
 	@Override
 	public void visit(ForStatement p) throws ParseTreeException {
 		isInsideALoop.push(true);
-		visitingLoops(p.getStatements());
 		super.visit(p);
-
 		isInsideALoop.pop();
 	}
 
 	@Override
 	public void visit(WhileStatement p) throws ParseTreeException {
-		isInsideALoop.push(true);	
-		visitingLoops(p.getStatements());
+		isInsideALoop.push(true);
 		super.visit(p);
-		loopLocalVariables = null;
-
 		isInsideALoop.pop();
 	}
 
 	@Override
 	public void visit(DoWhileStatement p) throws ParseTreeException {
 		isInsideALoop.push(true);
-		visitingLoops(p.getStatements());
 		super.visit(p);
 		isInsideALoop.pop();
 	}
@@ -360,7 +302,7 @@ public class AOIS extends Arithmetic_OP {
 
 		contextInfo.setBefore(original_var.toString());
 		contextInfo.setAfter(mutant);
-
+		
 		try {
 			PrintWriter out = getPrintWriter(f_name);
 			AOIS_Writer writer = new AOIS_Writer(mutant_dir, out);
@@ -377,15 +319,15 @@ public class AOIS extends Arithmetic_OP {
 			e.printStackTrace();
 		}
 	}
-
-	private void astContext() {
-
+	
+	private void astContext(){
+		
 	}
 
 	/**
 	 * Avoid generate equivalent mutants
 	 * 
-	 * @param exp(original)
+	 * @param original
 	 * @param mutant
 	 * @param mutation
 	 * @return
@@ -395,6 +337,8 @@ public class AOIS extends Arithmetic_OP {
 		// No need to generate post-increment/decrement
 
 		Expression e;
+
+
 		if (original instanceof Variable) {
 			if (isInsideAReturnStatement) {
 				if (mutation == AOISMutations.POSINCREMENT_INSERTION
@@ -416,16 +360,6 @@ public class AOIS extends Arithmetic_OP {
 					}
 				}
 			}
-			if (isInsideAMethod && !isInsideALoop.isEmpty()) {
-				if (mutation == AOISMutations.POSINCREMENT_INSERTION
-						|| mutation == AOISMutations.POSDECREMENT_INSERTION) {
-					if (lastReferenceOfAVariableInLoop.contains(original)) {
-						String desc = original.toFlattenString() + " => " + mutant.toFlattenString();
-						logReduction("AOIS", desc);
-						return LogReduction.AVOID;
-					}
-				}
-			}
 
 			// #Rule 2: Is correct applying mutation operator in ThrowStatement?
 			// if(isInsideAThrowStatement){
@@ -439,8 +373,8 @@ public class AOIS extends Arithmetic_OP {
 	/**
 	 * Avoid generate duplicated mutants
 	 * 
-	 * @param statementList
-	 * @param mutation
+	 * @param original
+	 * @param mutant
 	 * @return
 	 * @throws ParseTreeException
 	 */

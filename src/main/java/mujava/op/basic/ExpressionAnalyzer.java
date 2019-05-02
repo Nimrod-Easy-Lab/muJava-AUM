@@ -1,15 +1,13 @@
 package mujava.op.basic;
 
-import mujava.util.Debug;
 import openjava.mop.Environment;
 import openjava.mop.OJClass;
 import openjava.mop.OJSystem;
 import openjava.ptree.*;
-import openjava.tools.parser.ParseException;
 
 
 public class ExpressionAnalyzer {
-    private Expression rootExpression;
+    private Expression expression;
     private Environment environment;
     private boolean insideIf;
     private boolean insideFor;
@@ -33,8 +31,8 @@ public class ExpressionAnalyzer {
         }
     }
 
-    public BinaryExpression getRootExpression() {
-        return (BinaryExpression) rootExpression;
+    public BinaryExpression getExpression() {
+        return (BinaryExpression) expression;
     }
 
     public boolean isInsideIf() {
@@ -106,8 +104,8 @@ public class ExpressionAnalyzer {
         return forIteratorIncrements;
     }
 
-    private void setRootExpression(BinaryExpression rootExpression) {
-        this.rootExpression = rootExpression;
+    private void setExpression(BinaryExpression expression) {
+        this.expression = expression;
     }
 
     private void setEnvironment(Environment environment) {
@@ -289,6 +287,12 @@ public class ExpressionAnalyzer {
                 return "<=";
             }
         },
+        MOD {
+            @Override
+            public String toString() {
+                return "%";
+            }
+        },
         NOTIMPLEMENTED {
             @Override
             public String toString() {
@@ -324,6 +328,9 @@ public class ExpressionAnalyzer {
             case BinaryExpression.LESSEQUAL:
                 op = BinaryOperator.LESSEREQUAL;
                 break;
+            case BinaryExpression.MOD:
+                op = BinaryOperator.MOD;
+                break;
             default:
                 op = BinaryOperator.NOTIMPLEMENTED;
                 break;
@@ -333,7 +340,7 @@ public class ExpressionAnalyzer {
 
     void init() {
         rootOperator = BinaryOperator.NONE;
-        rootExpression = null;
+        expression = null;
         environment = null;
         insideIf = false;
         insideFor = false;
@@ -405,13 +412,13 @@ public class ExpressionAnalyzer {
     }
 
     void parse() {
-        if (rootExpression instanceof BinaryExpression) {
+        if (expression instanceof BinaryExpression) {
             Debug("Parsing as BinaryExpression", DebugLevel.BASIC);
-            setBinaryExpressionProperties((BinaryExpression) rootExpression);
+            setBinaryExpressionProperties((BinaryExpression) expression);
         }
-        else if (rootExpression instanceof ForStatement) {
+        else if (expression instanceof ForStatement) {
             Debug("Parsing as ForStatement", DebugLevel.BASIC);
-            setForStatementProperties((ForStatement) rootExpression);
+            setForStatementProperties((ForStatement) expression);
         } else {
             Debug("Expression parsing not implemented for: ", DebugLevel.BASIC);
         }
@@ -424,7 +431,7 @@ public class ExpressionAnalyzer {
 
     public ExpressionAnalyzer(Expression expression, Environment environment) {
         this();
-        rootExpression = expression;
+        this.expression = expression;
         this.environment = environment;
         Debug("\nAnalyzing expression: " + expression.toString(), DebugLevel.BASIC);
         parse();

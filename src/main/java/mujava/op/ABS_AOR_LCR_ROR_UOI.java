@@ -428,7 +428,6 @@ public class ABS_AOR_LCR_ROR_UOI extends mujava.op.util.Mutator
 
    private void aorMutantGen(BinaryExpression exp, int op)
    {
-      if (isEquivalent(exp)) return;
 
 	  if (op != BinaryExpression.TIMES)
 	  {
@@ -845,22 +844,6 @@ public class ABS_AOR_LCR_ROR_UOI extends mujava.op.util.Mutator
 		 System.err.println( "errors during printing " + f_name );
 		 e.printStackTrace();
       }
-   }
-
-   public boolean isEquivalent(BinaryExpression binaryExpression) {
-      switch (binaryExpression.getOperator()) {
-         case BinaryExpression.TIMES:
-         case BinaryExpression.DIVIDE:
-         case BinaryExpression.MOD:
-         case BinaryExpression.PLUS:
-         case BinaryExpression.MINUS:
-            if (binaryExpression.getParent() instanceof AllocationExpression) {
-               AllocationExpression allocationExpression = (AllocationExpression) binaryExpression.getParent();
-               System.out.println(allocationExpression.toFlattenString());
-            }
-            break;
-      }
-      return false;
    }
 
 }

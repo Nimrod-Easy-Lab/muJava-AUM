@@ -15,21 +15,13 @@
  */
 package mujava.op.basic;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import mujava.op.basic.AOIS.AOISMutations;
 import mujava.op.util.LogReduction;
-import openjava.mop.FileEnvironment;
-import openjava.ptree.AssignmentExpression;
-import openjava.ptree.BinaryExpression;
-import openjava.ptree.ClassDeclaration;
-import openjava.ptree.CompilationUnit;
-import openjava.ptree.Expression;
-import openjava.ptree.FieldAccess;
-import openjava.ptree.ParseTreeException;
-import openjava.ptree.UnaryExpression;
-import openjava.ptree.Variable;
+import openjava.mop.*;
+import openjava.ptree.*;
+import java.io.*;
+
+import static mujava.op.basic.ExpressionAnalyzer.BinaryOperator.DIFFERENT;
+import static mujava.op.basic.ExpressionAnalyzer.BinaryOperator.EQUALS;
 
 /**
  * <p>
@@ -40,25 +32,34 @@ import openjava.ptree.Variable;
  * @author Yu-Seung Ma
  * @version 1.0
  * 
- *          Took out aor_flag for not clear about the reason of using it. Lin
- *          Deng, Aug 23
+ * Took out aor_flag for not clear about the reason of using it. 
+ * Lin Deng, Aug 23
  * 
- *          Added code to generate mutants for logical expressions. E.g., a < b
- *          => -a < b Lin Deng, Aug 28
+ * Added code to generate mutants for logical expressions.
+ * E.g., a < b  =>  -a < b
+ * Lin Deng, Aug 28
  * 
  */
 
 public class AOIU extends Arithmetic_OP {
 	// boolean aor_flag = false;
+	private java.util.List<String> allOperatorsSelected;
 
 	public AOIU(FileEnvironment file_env, ClassDeclaration cdecl, CompilationUnit comp_unit) {
 		super(file_env, comp_unit);
+		allOperatorsSelected = new java.util.ArrayList<>();
+	}
+
+    public AOIU(FileEnvironment file_env, ClassDeclaration cdecl
+			, CompilationUnit comp_unit, java.util.List<String> allOperatorsSelected) {
+		this(file_env,cdecl,comp_unit);
+		this.allOperatorsSelected = allOperatorsSelected;
 	}
 
 	/**
 	 * Set an AOR flag
 	 * 
-	 * @param b
+	 * @param p
 	 */
 	// public void setAORflag(boolean b)
 	// {
@@ -74,9 +75,7 @@ public class AOIU extends Arithmetic_OP {
 	 */
 	public void visit(Variable p) throws ParseTreeException {
 		if (isArithmeticType(p)) {
-			if (!isEquivalent(p, new Variable("-" + p.toString()))) {
-				outputToFile(p);
-			}
+			outputToFile(p);
 		}
 	}
 
@@ -85,9 +84,7 @@ public class AOIU extends Arithmetic_OP {
 	 */
 	public void visit(FieldAccess p) throws ParseTreeException {
 		if (isArithmeticType(p)) {
-			if (!isEquivalent(p, new FieldAccess("-" + p.toString()))) {
-				outputToFile(p);
-			}
+			outputToFile(p);
 		}
 	}
 
@@ -110,7 +107,7 @@ public class AOIU extends Arithmetic_OP {
 			super.visit(e1);
 			// Ignore right expression because it produce equivalent mutants;
 			// Expression e2 = p.getRight();
-			//
+			// 
 			// WHY??? (LIN 08/28)
 		} else if ((p.getOperator() == BinaryExpression.DIVIDE) || (p.getOperator() == BinaryExpression.TIMES)) {
 			Expression e1 = p.getLeft();
@@ -125,18 +122,19 @@ public class AOIU extends Arithmetic_OP {
 			} else {
 				super.visit(p);
 			}
-		}
+		} 
 		// 08/28
 		// Lin added to generate mutants for logical expressions
 		// e.g.
-		// a < b => -a < b
-		else if ((p.getOperator() == BinaryExpression.GREATER) || (p.getOperator() == BinaryExpression.GREATEREQUAL)
+		// a < b  => -a < b
+		else if (((p.getOperator() == BinaryExpression.GREATER) || (p.getOperator() == BinaryExpression.GREATEREQUAL)
 				|| (p.getOperator() == BinaryExpression.LESSEQUAL) || (p.getOperator() == BinaryExpression.EQUAL)
-				|| (p.getOperator() == BinaryExpression.NOTEQUAL) || (p.getOperator() == BinaryExpression.LESS)) {
+				|| (p.getOperator() == BinaryExpression.NOTEQUAL) || (p.getOperator() == BinaryExpression.LESS))
+				&& !isEquivalent(p)) {
 			Expression e1 = p.getLeft();
 			Expression e2 = p.getRight();
-			super.visit(e1);
-			super.visit(e2);
+				super.visit(e1);
+				super.visit(e2);
 		}
 	}
 
@@ -149,14 +147,9 @@ public class AOIU extends Arithmetic_OP {
 		// Right Expression : a = b = -c;
 		// Wrong Expression : a = -b = c;
 		// Ignore left expression
-
-		checkEquivalence(p);
+		if (isEquivalent(p)) return;
 		Expression rexp = p.getRight();
 		rexp.accept(this);
-	}
-
-	private void checkEquivalence(AssignmentExpression p) {
-		System.out.println(p);
 	}
 
 	/***
@@ -219,28 +212,75 @@ public class AOIU extends Arithmetic_OP {
 		}
 	}
 
-	/**
-	 * Avoid generate equivalent mutants
-	 * 
-	 * @param exp(original)
-	 * @param mutant
-	 * @param mutation
-	 * @return
-	 */
-	private boolean isEquivalent(Expression original, Expression mutant) {
-		// #Rule 1: If the original expression is an AssignmentExpression.MOD (eg. x %=
-		// y).
-		// No need to generate AOIU Mutant (eg. x %= -y))
-		if (original instanceof Variable) {
-			if (((Variable) original).getParent() instanceof AssignmentExpression) {
-				AssignmentExpression ae = (AssignmentExpression) ((Variable) original).getParent();
-				if (ae.getOperator() == AssignmentExpression.MOD) {
-					String desc = original.toFlattenString() + " => " + mutant.toFlattenString();
-					logReduction("AOIU", desc);
-					return LogReduction.AVOID;
-				}
+	boolean isEquivalent(AssignmentExpression exp) {
+		boolean aoiu12 = false;
+        /*
+		AOIU 12
+        "term = v1 %= v2;
+        transformations = {
+          AOIU(v2) = -v2
+        }
+        constraints = {
+
+        }"
+		*/
+        if (exp.getOperator() == AssignmentExpression.MOD) {
+			aoiu12 = LogReduction.AVOID;
+			System.out.println("[TOUCHDOWN] ERULE AOIU12 >>>>> " + exp.toFlattenString());
+		}
+		return aoiu12;
+	}
+
+	boolean isEquivalent(BinaryExpression exp) {
+		boolean aoiu15 = false;
+		boolean aoiu12 = false;
+		/*
+		AOIU 15
+		"term = if(exp op 0){...}
+			transformations = {
+			  AOIU(exp) = -exp
+			}
+			constraints = {
+			  op ∈ {==, !=}
+			}"
+		 */
+        ExpressionAnalyzer aexp = new ExpressionAnalyzer(exp, this.getEnvironment());
+		if (aexp.containsZeroLiteral() && aexp.isInsideIf()) {
+			aoiu15 = LogReduction.AVOID;
+			switch (aexp.getRootOperator()) {
+				case EQUALS:
+				case DIFFERENT:
+					System.out.println("AOIU E15 >>>> " + exp.toFlattenString());
+					break;
+				default:
+                    aoiu15 = false;
+                    break;
 			}
 		}
-		return false;
+        /*
+		AOIU 12
+        "term = v1 %= v2;
+        transformations = {
+          AOIU(v2) = -v2
+        }
+        constraints = {
+
+        }"
+		*/
+        if (aexp.getRootOperator().equals(ExpressionAnalyzer.BinaryOperator.MOD)) {
+
+		}
+		return aoiu15;
+	}
+	public boolean isDuplicated (AssignmentExpression assignmentExpression) {
+		boolean d_aoiu_43 = false;
+		if (assignmentExpression.getOperator() == AssignmentExpression.ADD) {
+			if (allOperatorsSelected.contains("ASRS")) {
+				String desc = assignmentExpression.toFlattenString();
+				logReduction("AOIU", "ASRS", desc);
+				d_aoiu_43 = LogReduction.AVOID;
+			}
+		}
+		return d_aoiu_43;
 	}
 }
