@@ -613,24 +613,6 @@ public class MutationSystem extends OJSystem
       }
    }
 
-   public static void setJMutationStructureFromFilePath(String path) throws FileNotFoundException {
-       if (path.length() <= 0) throw new FileNotFoundException();
-       File file_ref = new File(path);
-        if (file_ref.exists()) {
-            setJMutationStructure(path);
-        }
-        else {
-            path = MutationSystem.SYSTEM_HOME + path;
-            file_ref = new File(path);
-            if (file_ref.exists()) {
-                setJMutationStructure(path);
-            }
-            else {
-                throw  new FileNotFoundException();
-            }
-        }
-   }
-
   /** <p> Recognize file structure for mutation system from not "mujava.config" but from user directly </p>*/
    public static void setJMutationStructure(String home_path)
    {
