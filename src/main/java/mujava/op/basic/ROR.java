@@ -42,6 +42,8 @@ import openjava.ptree.util.ParseTreeVisitor;
 
 public class ROR extends Arithmetic_OP {
 
+    private boolean d_ror66_flag = false;
+
     public enum RORMutations {
         CONDITIONAL_EXPRESSION_AFFIRMATION, CONDITIONAL_EXPRESSION_NEGATION;
     }
@@ -366,7 +368,45 @@ public class ROR extends Arithmetic_OP {
                 }
             }
         }
+        /* ROR D Rule 66
+        "term = if(vArgs.length == 0){...}
+        transformations = {
+          ROR(==) = !=,
+          ROR(==) = >
+        }
+        constraints = {
+          the type of v is String or Array
+        }"
+        * */
+        else if (mutant instanceof BinaryExpression)
+        {
+            BinaryExpression mutant_ = (BinaryExpression) mutant;
+            if (exp.getOperator() == BinaryExpression.EQUAL && ((mutant_.getOperator()
+                    == BinaryExpression.NOTEQUAL) || (mutant_.getOperator() == BinaryExpression.GREATER)) )
+            {
+                ParseTreeObject parseTreeObject = exp;
 
+                while ((parseTreeObject!=null)&&!(parseTreeObject instanceof IfStatement))
+                    parseTreeObject = parseTreeObject.getParent();
+
+                ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(exp, this.getEnvironment());
+                //Means its inside an if statement
+                if ((parseTreeObject != null) && (expressionAnalyzer.containsString() ||
+                        expressionAnalyzer.containsArray()) && expressionAnalyzer.containsLengthMethodCall() &&
+                        expressionAnalyzer.containsZeroLiteral())
+                {
+                    if (this.d_ror66_flag)
+                    {
+                        logReduction("ROR", "ROR",
+                                "ROR D 66 => " + exp.toFlattenString());
+                        d_ror66_flag = false;
+                        return LogReduction.AVOID;
+                    }
+                    else
+                        d_ror66_flag = true;
+                }
+            }
+        }
         return false;
     }
 
