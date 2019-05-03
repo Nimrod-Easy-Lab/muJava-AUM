@@ -272,7 +272,45 @@ public class AOIU extends Arithmetic_OP {
 		}
 		return aoiu15;
 	}
-	public boolean isDuplicated (AssignmentExpression assignmentExpression) {
+
+	private boolean isDuplicated (Expression expression) {
+		/*
+		*   "term = BufferedArrayOutputStream v1; ... v1.write(..., ..., v2);
+            transformations = {
+              AOIU(v2) = -v2,
+              LOI(v2) = ~v2
+            }
+            constraints = {
+              v2 > 0,
+              v2 can be any primitive numeric type
+            }"
+		* */
+		boolean d_aoiu_56 = false;
+		int limit = 5;
+		ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
+		while ((parseTreeObject != null)&&!((parseTreeObject instanceof MethodCall)
+				||(parseTreeObject instanceof MethodDeclaration))&&(limit>0)) {
+			limit--;
+			parseTreeObject = parseTreeObject.getParent();
+		}
+		try {
+			if (parseTreeObject instanceof MethodCall) {
+				MethodCall methodCall = (MethodCall) parseTreeObject;
+				if (methodCall.getName().equals("write")) {
+				    //TODO: check if expression > 0
+				    if (expression instanceof Literal) {
+				    	Literal literal = (Literal) expression;
+					}
+				}
+
+			}
+		} catch (ClassCastException ignored) {
+
+		}
+		return d_aoiu_56;
+	}
+
+	private boolean isDuplicated (AssignmentExpression assignmentExpression) {
 		boolean d_aoiu_43 = false;
 		if (assignmentExpression.getOperator() == AssignmentExpression.ADD) {
 			if (allOperatorsSelected.contains("ASRS")) {
