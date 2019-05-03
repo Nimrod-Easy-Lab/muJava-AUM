@@ -1,18 +1,13 @@
 package mujava.cli;
 
 import mujava.AllMutantsGenerator;
-import mujava.MutantsGenerator;
 import mujava.MutationSystem;
 import mujava.op.basic.ExpressionAnalyzer;
 import mujava.op.util.CodeChangeLog;
 import mujava.util.Debug;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.kohsuke.args4j.*;
@@ -61,9 +56,9 @@ public class CLIExecution {
     private List<String> arguments = new ArrayList<>();
 
 
-    public CLIExecution() {}
+    private CLIExecution() {}
 
-    public void doMain(String[] args) throws Exception {
+    private void doMain(String[] args) throws Exception {
         CmdLineParser cmdLineParser = new CmdLineParser(this);
         try {
             cmdLineParser.parseArgument(args);
@@ -85,13 +80,20 @@ public class CLIExecution {
         for (String session : inputSessions) {
             configureForProjectFolder(session);
             File sourceFolder = new File(MutationSystem.SRC_PATH);
-            File[] sources = sourceFolder.listFiles();
-            for (File source : sources) {
-                configureForFile(session,source.getName().replace(".java",""));
-                AllMutantsGenerator amg = new AllMutantsGenerator(source, classMutantsOperators,
-                        traditionalMutantsOperators);
-                amg.makeMutants();
-                if (compile) amg.compileMutants();
+            File[] files_in_sourceFolder = sourceFolder.listFiles();
+
+            if (files_in_sourceFolder == null) throw new Exception("No source files found.");
+            if (files_in_sourceFolder.length == 0) throw new Exception("No source files found.");
+
+            for (File source : files_in_sourceFolder) {
+                if (source.getName().endsWith(".java"))
+                {
+                    configureForFile(session,source.getName().replace(".java",""));
+                    AllMutantsGenerator amg = new AllMutantsGenerator(source, classMutantsOperators,
+                            traditionalMutantsOperators);
+                    amg.makeMutants();
+                    if (compile) amg.compileMutants();
+                }
             }
         }
     }
