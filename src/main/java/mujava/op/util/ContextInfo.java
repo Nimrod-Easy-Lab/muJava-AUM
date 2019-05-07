@@ -33,9 +33,8 @@ package mujava.op.util;
  * literal. – Has variable: indicates whether the mutated AST node has an
  * immediate child node that is a variable. – Has operator: indicates whether
  * the mutated AST node has an immediate child node that is an oper- ator.
- * 
- * @author leofernandesmo
  *
+ * @author leofernandesmo
  */
 
 // @Documented
@@ -44,89 +43,89 @@ package mujava.op.util;
 // @Retention(RetentionPolicy.RUNTIME)
 // public @interface ContextInfo{
 public class ContextInfo {
-	// String stuStream() default "CSE";
-	// String mutationOperatorGroup(); //one of AOR, COR, EVR, LOR, LVR, ORU,
-	// ROR, SOR, or STD.
-	// String mutationOperator(); //the specific program transformation that
-	// generates a mutant (e.g., lhs < rhs ?−→lhs != rhs).
-	// String nodeDataType(); //the summary data type of the mutated node in the
-	// AST (e.g., int, boolean, class).
-	// String astContext(); //the sequence of AST node types from the mutated
-	// node (inclusive) to the root node of the AST.
-	// String parentContext(); //the AST node type of the immediate parent node
-	// of the mutated AST node.
+  // String stuStream() default "CSE";
+  // String mutationOperatorGroup(); //one of AOR, COR, EVR, LOR, LVR, ORU,
+  // ROR, SOR, or STD.
+  // String mutationOperator(); //the specific program transformation that
+  // generates a mutant (e.g., lhs < rhs ?−→lhs != rhs).
+  // String nodeDataType(); //the summary data type of the mutated node in the
+  // AST (e.g., int, boolean, class).
+  // String astContext(); //the sequence of AST node types from the mutated
+  // node (inclusive) to the root node of the AST.
+  // String parentContext(); //the AST node type of the immediate parent node
+  // of the mutated AST node.
 
-	private String mutationOperatorGroup;
-	private String mutationOperator;
-	private String nodeDataType;
-	private String astContext;
-	private String parentContext;
-	private String before;
-	private String after;
-	private int line;
-	
-	
-	public int getLine() {
-		return line;
-	}
+  private String mutationOperatorGroup;
+  private String mutationOperator;
+  private String nodeDataType;
+  private String astContext;
+  private String parentContext;
+  private String before;
+  private String after;
+  private int line;
 
-	public void setLine(int line) {
-		this.line = line;
-	}
 
-	public String getBefore() {
-		return before;
-	}
+  public int getLine() {
+	return line;
+  }
 
-	public void setBefore(String before) {
-		this.before = before;
-	}
+  public void setLine(int line) {
+	this.line = line;
+  }
 
-	public String getAfter() {
-		return after;
-	}
+  public String getBefore() {
+	return before;
+  }
 
-	public void setAfter(String after) {
-		this.after = after;
-	}
+  public void setBefore(String before) {
+	this.before = before;
+  }
 
-	public String getMutationOperatorGroup() {
-		return mutationOperatorGroup;
-	}
+  public String getAfter() {
+	return after;
+  }
 
-	public void setMutationOperatorGroup(String mutationOperatorGroup) {
-		this.mutationOperatorGroup = mutationOperatorGroup;
-	}
+  public void setAfter(String after) {
+	this.after = after;
+  }
 
-	public String getMutationOperator() {
-		return mutationOperator;
-	}
+  public String getMutationOperatorGroup() {
+	return mutationOperatorGroup;
+  }
 
-	public void setMutationOperator(String mutationOperator) {
-		this.mutationOperator = mutationOperator;
-	}
+  public void setMutationOperatorGroup(String mutationOperatorGroup) {
+	this.mutationOperatorGroup = mutationOperatorGroup;
+  }
 
-	public String getNodeDataType() {
-		return nodeDataType;
-	}
+  public String getMutationOperator() {
+	return mutationOperator;
+  }
 
-	public void setNodeDataType(String nodeDataType) {
-		this.nodeDataType = nodeDataType;
-	}
+  public void setMutationOperator(String mutationOperator) {
+	this.mutationOperator = mutationOperator;
+  }
 
-	public String getAstContext() {
-		return astContext;
-	}
+  public String getNodeDataType() {
+	return nodeDataType;
+  }
 
-	public void setAstContext(String astContext) {
-		this.astContext = astContext;
-	}
+  public void setNodeDataType(String nodeDataType) {
+	this.nodeDataType = nodeDataType;
+  }
 
-	public String getParentContext() {
-		return parentContext;
-	}
+  public String getAstContext() {
+	return astContext;
+  }
 
-	public void setParentContext(String parentContext) {
-		this.parentContext = parentContext;
-	}
+  public void setAstContext(String astContext) {
+	this.astContext = astContext;
+  }
+
+  public String getParentContext() {
+	return parentContext;
+  }
+
+  public void setParentContext(String parentContext) {
+	this.parentContext = parentContext;
+  }
 }
