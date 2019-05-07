@@ -2,7 +2,7 @@ package mujava.cli;
 
 import mujava.AllMutantsGenerator;
 import mujava.MutationSystem;
-import mujava.op.basic.ExpressionAnalyzer;
+import mujava.op.util.ExpressionAnalyzer;
 import mujava.op.util.CodeChangeLog;
 import mujava.util.Debug;
 import org.kohsuke.args4j.Argument;

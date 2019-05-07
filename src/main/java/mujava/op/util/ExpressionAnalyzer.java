@@ -5,6 +5,8 @@ import openjava.mop.OJClass;
 import openjava.mop.OJSystem;
 import openjava.ptree.*;
 
+import java.lang.reflect.Type;
+
 
 public class ExpressionAnalyzer {
   private Expression expression;
@@ -29,6 +31,17 @@ public class ExpressionAnalyzer {
 	if (level.ordinal() <= DbgLevel.ordinal()) {
 	  System.out.println(str);
 	}
+  }
+
+  public static <T extends Expression> T getParent(Expression expression) {
+    T ret = null;
+    Class<T> tClass = (Class<T>) ret.getClass();
+    ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
+    while ( (parseTreeObject!=null)&&!(tClass.isInstance(parseTreeObject)) ) {
+      parseTreeObject = parseTreeObject.getParent();
+	}
+    ret = (T) parseTreeObject;
+    return ret;
   }
 
   public BinaryExpression getExpression() {

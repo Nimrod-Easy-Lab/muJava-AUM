@@ -18,6 +18,7 @@ package mujava.op.basic;
 import mujava.op.util.LogReduction;
 import openjava.mop.FileEnvironment;
 import openjava.ptree.*;
+import mujava.op.util.ExpressionAnalyzer;
 
 import java.io.IOException;
 import java.io.PrintWriter;

@@ -75,7 +75,7 @@ public class AOIU extends Arithmetic_OP {
    * Generate AOIU mutant
    */
   public void visit(Variable p) throws ParseTreeException {
-	if (isArithmeticType(p)) {
+	if (isArithmeticType(p) && !isDuplicated(p)) {
 	  outputToFile(p);
 	}
   }
@@ -84,7 +84,7 @@ public class AOIU extends Arithmetic_OP {
    * Generate AOIU mutant
    */
   public void visit(FieldAccess p) throws ParseTreeException {
-	if (isArithmeticType(p)) {
+	if (isArithmeticType(p) && !isDuplicated(p)) {
 	  outputToFile(p);
 	}
   }
