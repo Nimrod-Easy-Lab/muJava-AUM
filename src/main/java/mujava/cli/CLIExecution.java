@@ -2,6 +2,7 @@ package mujava.cli;
 
 import mujava.AllMutantsGenerator;
 import mujava.MutationSystem;
+import mujava.OpenJavaException;
 import mujava.op.util.ExpressionAnalyzer;
 import mujava.op.util.CodeChangeLog;
 import mujava.util.Debug;
@@ -12,10 +13,16 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.BooleanOptionHandler;
 import org.kohsuke.args4j.spi.StringArrayOptionHandler;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Command line execution definitions
+ *
+ * @author Pedro Pinheiro
+ */
 public class CLIExecution {
   /**
    * All default class mutation operators
@@ -31,14 +38,36 @@ public class CLIExecution {
 	  , "AODS", "AOIU", "AOIS", "ROR", "COR", "COD", "COI", "SOR", "LOR", "LOI", "LOD", "ASRS", "SDL",
 	  "VDL", "CDL", "ODL"};
 
+  private boolean isValidTraditionalMutantOperator(String operator) {
+	boolean contains = false;
+	for (String str : DefaultTraditionalMutantsOperators) {
+	  if (str.equals(operator)) {
+		contains = true;
+		break;
+	  }
+	}
+	return contains;
+  }
+
+  private boolean isValidClassMutantOperator(String operator) {
+	boolean contains = false;
+	for (String str : DefaultClassMutantsOperators) {
+	  if (str.equals(operator)) {
+		contains = true;
+		break;
+	  }
+	}
+	return contains;
+  }
+
   /**
-   * Selected traditional mutation operators
+   * Selected traditional mutation operators. Defaults to all operators.
    */
   @Option(name = "-co", handler = StringArrayOptionHandler.class, usage = "Set class mutants operators.")
   private String[] classMutantsOperators = DefaultClassMutantsOperators;
 
   /**
-   * Selected traditional mutation operators
+   * Selected traditional mutation operators. Defaults to all operators.
    */
   @Option(name = "-to", handler = StringArrayOptionHandler.class, usage = "Set traditional mutants operators.")
   private String[] traditionalMutantsOperators = DefaultTraditionalMutantsOperators;
@@ -47,19 +76,87 @@ public class CLIExecution {
    * Input sessions
    */
   @Option(name = "-i", handler = StringArrayOptionHandler.class, usage = "Comma separated list of input sessions.")
-  private List<String> inputSessions = new ArrayList<>();
+  private List<String> input = new ArrayList<>();
 
   /**
-   * Whether compile or not
+   * Whether nocompile or not. Defaults to true.
    */
-  @Option(name = "-c", handler = BooleanOptionHandler.class, usage = "Compile or not.")
-  private boolean compile = true;
+  @Option(name = "-noc", handler = BooleanOptionHandler.class, usage = "Do not compile.")
+  private boolean nocompile;
 
   @Argument
   private List<String> arguments = new ArrayList<>();
 
 
   private CLIExecution() {
+  }
+
+  private void doMutation(java.io.File source) throws OpenJavaException {
+	AllMutantsGenerator amg = new AllMutantsGenerator(source, classMutantsOperators,
+		traditionalMutantsOperators);
+	amg.makeMutants();
+	if (!nocompile) amg.compileMutants();
+  }
+
+  /**
+   * Evaluates whether input string corresponds to a Java file or a folder and processes accordingly.
+   *
+   * @param input String representing a path to a Java file or a folder containing source code structured by
+   *              supported format
+   * @throws Exception When the string provided is not a path to a Java file or folder, or file/folder is not readable.
+   */
+  private void processInput(String input) throws Exception {
+	char[] sanitizedPath = new char[input.length()];
+	for (int i = 0; i < input.length(); ++i) {
+	  if (input.charAt(i) == '\\') sanitizedPath[i] = '/';
+	  else sanitizedPath[i] = input.charAt(i);
+	}
+	input = new String(sanitizedPath);
+	if (input.contains(".java")) {
+	  String before_src = input.substring(0, input.indexOf("/src/"));
+	  String classname = Paths.get(input).getFileName().toString();
+	  classname = classname.replace(".java", "");
+	  configureForProjectFolder(before_src);
+	  configureForFile(before_src, classname);
+	  System.out.println("Generating mutants for " + classname + ".");
+	  System.out.println("Session is" + before_src + ".");
+	  java.io.File source = new java.io.File(input);
+	  doMutation(source);
+	} else if (Files.isDirectory(Paths.get(input))) {
+	  processInputAsDirectory(input);
+	} else {
+	  System.out.println("Invalid input. Try -h for help.");
+	}
+  }
+
+  private void processInputAsDirectory(String session_path) throws IOException {
+	String source_folder = session_path + "/src/";
+	try (DirectoryStream<Path> stream = java.nio.file.Files.newDirectoryStream(Paths.get(source_folder), "*.java")) {
+	  for (Path entry : stream)
+		processInput(entry.toString());
+
+	} catch (DirectoryIteratorException ex) {
+	  throw ex.getCause();
+	} catch (Exception e) {
+	  e.printStackTrace();
+	}
+  }
+
+  private static void configureForProjectFolder(String path) throws Exception {
+	Debug.setDebugLevel(Debug.DETAILED_LEVEL);
+	ExpressionAnalyzer.DbgLevel = ExpressionAnalyzer.DebugLevel.NONE;
+	MutationSystem.setJMutationStructure(path);
+
+	CodeChangeLog.openLogFile();
+  }
+
+  private void configureForFile(String path, String classname) throws Exception {
+	MutationSystem.ORIGINAL_PATH = path + "/result/" + classname + "/original";
+	MutationSystem.CLASS_NAME = classname;
+	MutationSystem.TRADITIONAL_MUTANT_PATH = path + "/result/" + classname + "/traditional_mutants";
+	MutationSystem.CLASS_MUTANT_PATH = path + "/result/" + classname + "/class_mutants";
+	MutationSystem.MUTANT_PATH = MutationSystem.TRADITIONAL_MUTANT_PATH;
+	MutationSystem.recordInheritanceRelation();
   }
 
   private void doMain(String[] args) throws Exception {
@@ -76,52 +173,12 @@ public class CLIExecution {
 	  // print the list of available options
 	  cmdLineParser.printUsage(System.err);
 	  System.err.println();
-
-	  // print option sample. This is useful some time
-//            System.err.println("  Example: java SampleMain"+cmdLineParser.printExample(ALL));
+//	  System.err.println("  Example: java mujava.cli.CLI"+cmdLineParser.printExample(cmdLineParser.));
 	}
-
-	for (String session : inputSessions) {
-	  configureForProjectFolder(session);
-	  File sourceFolder = new File(MutationSystem.SRC_PATH);
-	  File[] files_in_sourceFolder = sourceFolder.listFiles();
-
-	  if (files_in_sourceFolder == null) throw new Exception("No source files found.");
-	  if (files_in_sourceFolder.length == 0) throw new Exception("No source files found.");
-
-	  for (File source : files_in_sourceFolder) {
-		if (source.getName().endsWith(".java")) {
-		  configureForFile(session, source.getName().replace(".java", ""));
-		  AllMutantsGenerator amg = new AllMutantsGenerator(source, classMutantsOperators,
-			  traditionalMutantsOperators);
-		  amg.makeMutants();
-		  if (compile) amg.compileMutants();
-		}
-	  }
-	}
-  }
-
-  private static void configureForProjectFolder(String path) throws Exception {
-	char[] sanitizedPath = new char[path.length()];
-	for (int i = 0; i < path.length(); ++i) {
-	  if (path.charAt(i) == '\\') sanitizedPath[i] = '/';
-	  else sanitizedPath[i] = path.charAt(i);
-	}
-	path = new String(sanitizedPath);
-	Debug.setDebugLevel(Debug.DETAILED_LEVEL);
-	ExpressionAnalyzer.DbgLevel = ExpressionAnalyzer.DebugLevel.NONE;
-	MutationSystem.setJMutationStructure(path);
-
-	CodeChangeLog.openLogFile();
-  }
-
-  private void configureForFile(String path, String classname) throws Exception {
-	MutationSystem.ORIGINAL_PATH = path + "/result/" + classname + "/original";
-	MutationSystem.CLASS_NAME = classname;
-	MutationSystem.TRADITIONAL_MUTANT_PATH = path + "/result/" + classname + "/traditional_mutants";
-	MutationSystem.CLASS_MUTANT_PATH = path + "/result/" + classname + "/class_mutants";
-	MutationSystem.MUTANT_PATH = MutationSystem.TRADITIONAL_MUTANT_PATH;
-	MutationSystem.recordInheritanceRelation();
+	System.out.println("Traditional mutant operators selected: " + traditionalMutantsOperators.toString() + ".");
+	System.out.println("Class mutant operators selected: " + classMutantsOperators.toString() + ".");
+	for (String i : input)
+	  processInput(i);
   }
 
   public static void main(String[] args) throws Exception {
