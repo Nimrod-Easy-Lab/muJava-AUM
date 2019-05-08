@@ -3,8 +3,8 @@ package mujava.cli;
 import mujava.AllMutantsGenerator;
 import mujava.MutationSystem;
 import mujava.OpenJavaException;
-import mujava.op.util.ExpressionAnalyzer;
 import mujava.op.util.CodeChangeLog;
+import mujava.op.util.ExpressionAnalyzer;
 import mujava.util.Debug;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -163,22 +163,19 @@ public class CLIExecution {
 	CmdLineParser cmdLineParser = new CmdLineParser(this);
 	try {
 	  cmdLineParser.parseArgument(args);
-	  if (arguments.isEmpty()) throw new CmdLineException(cmdLineParser, "No argument given");
+	  if (!arguments.isEmpty()) {
+		System.out.println("Traditional mutant operators selected: " + traditionalMutantsOperators.toString() + ".");
+		System.out.println("Class mutant operators selected: " + classMutantsOperators.toString() + ".");
+		for (String i : input)
+		  processInput(i);
+	  } else {
+		System.out.println("No arguments given.");
+		System.err.println("java mujava [options...] arguments...");
+		cmdLineParser.printUsage(System.err);
+	  }
 	} catch (CmdLineException e) {
-	  // if there's a problem in the command line,
-	  // you'll get this exception. this will report
-	  // an error message.
 	  System.err.println(e.getMessage());
-	  System.err.println("java SampleMain [options...] arguments...");
-	  // print the list of available options
-	  cmdLineParser.printUsage(System.err);
-	  System.err.println();
-//	  System.err.println("  Example: java mujava.cli.CLI"+cmdLineParser.printExample(cmdLineParser.));
 	}
-	System.out.println("Traditional mutant operators selected: " + traditionalMutantsOperators.toString() + ".");
-	System.out.println("Class mutant operators selected: " + classMutantsOperators.toString() + ".");
-	for (String i : input)
-	  processInput(i);
   }
 
   public static void main(String[] args) throws Exception {
