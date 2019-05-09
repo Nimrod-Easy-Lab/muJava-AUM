@@ -15,11 +15,12 @@
  */
 package mujava.op.basic;
 
+import mujava.op.rules.DRule;
+import mujava.op.util.LogReduction;
+import mujava.util.drule.AOIUVariableMutation;
+import mujava.util.drule.DRuleUtils;
 import openjava.mop.FileEnvironment;
-import openjava.ptree.AssignmentExpression;
-import openjava.ptree.ClassDeclaration;
-import openjava.ptree.CompilationUnit;
-import openjava.ptree.ParseTreeException;
+import openjava.ptree.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -92,7 +93,8 @@ public class ASRS extends MethodLevelMutator {
 	if (!(op == AssignmentExpression.SUB)) {
 	  mutant = (AssignmentExpression) (p.makeRecursiveCopy());
 	  mutant.setOperator(AssignmentExpression.SUB);
-	  outputToFile(p, mutant);
+	  if (!isDuplicated(p,mutant))
+		outputToFile(p, mutant);
 	}
 	if (!(op == AssignmentExpression.MOD)) {
 	  mutant = (AssignmentExpression) (p.makeRecursiveCopy());
@@ -175,5 +177,28 @@ public class ASRS extends MethodLevelMutator {
 	  System.err.println("errors during printing " + f_name);
 	  e.printStackTrace();
 	}
+  }
+
+  /*
+  * "term = v1 += v2
+  transformations = {
+	AOIU(v2) = -v2 ,
+	ASRS(+=) = -=;
+  }
+  constraints = {
+
+  }"
+  * */
+  private boolean isDuplicated(AssignmentExpression asge, AssignmentExpression mutant) {
+    boolean d_aoiu_asrs43 = false;
+    if (asge.getOperator() == AssignmentExpression.ADD && (mutant.getOperator() == AssignmentExpression.SUB)) {
+	  AOIUVariableMutation aoiuVariableMutation = new AOIUVariableMutation((Variable) asge.getRight(),
+		  this.env.currentClassName());
+	  if (DRuleUtils.access().consumeOperation(DRuleUtils.MOperator.AOIU,aoiuVariableMutation)) {
+	    d_aoiu_asrs43 = LogReduction.AVOID;
+		logReduction("AOIU", "ASRS", "DAOIU_ASRS43 =>" + asge.toFlattenString());
+	  }
+	}
+    return d_aoiu_asrs43;
   }
 }

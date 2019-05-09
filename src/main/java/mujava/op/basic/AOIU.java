@@ -17,6 +17,10 @@ package mujava.op.basic;
 
 import mujava.op.util.ExpressionAnalyzer;
 import mujava.op.util.LogReduction;
+import mujava.util.drule.AOIUVariableMutation;
+import mujava.util.drule.ASRSMutation;
+import mujava.util.drule.DRuleUtils;
+import mujava.util.drule.MutationInfo;
 import openjava.mop.FileEnvironment;
 import openjava.ptree.*;
 
@@ -42,8 +46,6 @@ import java.io.PrintWriter;
 
 public class AOIU extends Arithmetic_OP {
   // boolean aor_flag = false;
-
-  boolean aoiu_57_flag = false;
 
   private java.util.List<String> allOperatorsSelected;
 
@@ -84,7 +86,7 @@ public class AOIU extends Arithmetic_OP {
    * Generate AOIU mutant
    */
   public void visit(FieldAccess p) throws ParseTreeException {
-	if (isArithmeticType(p) && !isDuplicated(p)) {
+	if (isArithmeticType(p)) {
 	  outputToFile(p);
 	}
   }
@@ -274,95 +276,129 @@ public class AOIU extends Arithmetic_OP {
 	return aoiu15;
   }
 
-  private boolean isDuplicated(Expression expression) {
-        /*
-        * "term = type v := exp; ... return v;
-            transformations = {
-              AOIU(exp) = -exp,
-              AOIU(v) = -v
-            }
-            constraints = {
-              There is no definition of v between definition and the use in a return statement,
-              v can be any primitive numeric type
-            }"
-        * */
-	//TODO: there's another problem with using aoiu_57_flag : we need to check its lifetime
-	boolean d_aoiu_57 = false;
-	if (expression instanceof Variable) {
-	  if (this.aoiu_57_flag) {
+ /*"term = v1 += v2
+  transformations = {
+	AOIU(v2) = -v2 ,
+		ASRS(+=) = -=;
+  }
+  constraints = {
 
-		d_aoiu_57 = LogReduction.AVOID;
-		logReduction("AOIU", "AOIU", "D Rule 57 => " + expression.toString());
-	  } else {
-		Variable v = (Variable) expression;
-		ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
-		while ((parseTreeObject != null) && !(parseTreeObject instanceof MethodDeclaration)) {
-		  parseTreeObject = parseTreeObject.getParent();
-		}
-		if (parseTreeObject != null) {
-		  MethodDeclaration methodDeclaration = (MethodDeclaration) parseTreeObject;
-		  StatementList body = methodDeclaration.getBody();
-		  boolean redefinition_flag = false;
-		  for (int i = 0; i < body.size(); i++) {
-			ParseTree e = body.get(i);
-			if (!(e instanceof ReturnStatement)) {
-			  if (e.toFlattenString().contains(v.toFlattenString())) redefinition_flag = true;
-			}
-		  }
-
-		  if (!redefinition_flag) this.aoiu_57_flag = true;
-		}
-	  }
-
-	} else {
-	  ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
-	  while ((parseTreeObject != null) && !(parseTreeObject instanceof AssignmentExpression)) {
-		parseTreeObject = parseTreeObject.getParent();
-	  }
-	  if (parseTreeObject != null) {
-		if (this.aoiu_57_flag) {
-		  d_aoiu_57 = LogReduction.AVOID;
-		  logReduction("AOIU", "AOIU", "D Rule 57 => " + expression.toString());
-		} else {
-		  this.aoiu_57_flag = true;
-		}
-	  }
-	}
-		/*
-		*   "term = BufferedArrayOutputStream v1; ... v1.write(..., ..., v2);
-            transformations = {
-              AOIU(v2) = -v2,
-              LOI(v2) = ~v2
-            }
-            constraints = {
-              v2 > 0,
-              v2 can be any primitive numeric type
-            }"
-		* */
-	boolean d_aoiu_56 = false;
-	int limit = 5;
-	ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
-	while ((parseTreeObject != null) && !((parseTreeObject instanceof MethodCall)
-		|| (parseTreeObject instanceof MethodDeclaration)) && (limit > 0)) {
-	  limit--;
+  }"*/
+  private boolean isDuplicated(Variable variable) {
+	boolean d_aoiu_asrs43 = false;
+	ParseTreeObject parseTreeObject = (ParseTreeObject) variable;
+	while (parseTreeObject!=null && !((parseTreeObject instanceof AssignmentExpression)
+		|| (parseTreeObject instanceof MethodDeclaration))) {
 	  parseTreeObject = parseTreeObject.getParent();
 	}
-	try {
-	  if (parseTreeObject instanceof MethodCall) {
-		MethodCall methodCall = (MethodCall) parseTreeObject;
-		if (methodCall.getName().equals("write")) {
-		  //TODO: check if expression > 0
-		  if (expression instanceof Literal) {
-			Literal literal = (Literal) expression;
-		  }
+	if (parseTreeObject instanceof AssignmentExpression) {
+	  AssignmentExpression asge = (AssignmentExpression) parseTreeObject;
+	  boolean variableIsSame = variable.equals(asge.getRight());
+	  if (variableIsSame && (asge.getOperator() == AssignmentExpression.ADD)) {
+	    //TODO: Check whether currentClassName returns fully qualified Class name
+		ASRSMutation duplicatedMutation = new ASRSMutation("+=", "-=",asge
+			,this.env.currentClassName());
+		if (DRuleUtils.access().consumeOperation(DRuleUtils.MOperator.ASRS,duplicatedMutation)) {
+		  d_aoiu_asrs43 = LogReduction.AVOID;
+		  logReduction("AOIU", "ASRS", "DAOIU_ASRS =>" + asge.toFlattenString());
+		} else {
+		  DRuleUtils.access().insertMutation(DRuleUtils.MOperator.AOIU,
+			  new AOIUVariableMutation(variable,this.env.currentClassName()));
 		}
-
 	  }
-	} catch (ClassCastException ignored) {
-
 	}
-	return d_aoiu_56 || d_aoiu_57;
+	return d_aoiu_asrs43;
   }
+
+//  private boolean isDuplicated(Expression expression) {
+//        /*
+//        * "term = type v := exp; ... return v;
+//            transformations = {
+//              AOIU(exp) = -exp,
+//              AOIU(v) = -v
+//            }
+//            constraints = {
+//              There is no definition of v between definition and the use in a return statement,
+//              v can be any primitive numeric type
+//            }"
+//        * */
+//	//TODO: there's another problem with using aoiu_57_flag : we need to check its lifetime
+//	boolean d_aoiu_57 = false;
+//	if (expression instanceof Variable) {
+//	  if (this.aoiu_57_flag) {
+//
+//		d_aoiu_57 = LogReduction.AVOID;
+//		logReduction("AOIU", "AOIU", "D Rule 57 => " + expression.toString());
+//	  } else {
+//		Variable v = (Variable) expression;
+//		ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
+//		while ((parseTreeObject != null) && !(parseTreeObject instanceof MethodDeclaration)) {
+//		  parseTreeObject = parseTreeObject.getParent();
+//		}
+//		if (parseTreeObject != null) {
+//		  MethodDeclaration methodDeclaration = (MethodDeclaration) parseTreeObject;
+//		  StatementList body = methodDeclaration.getBody();
+//		  boolean redefinition_flag = false;
+//		  for (int i = 0; i < body.size(); i++) {
+//			ParseTree e = body.get(i);
+//			if (!(e instanceof ReturnStatement)) {
+//			  if (e.toFlattenString().contains(v.toFlattenString())) redefinition_flag = true;
+//			}
+//		  }
+//
+//		  if (!redefinition_flag) this.aoiu_57_flag = true;
+//		}
+//	  }
+//
+//	} else {
+//	  ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
+//	  while ((parseTreeObject != null) && !(parseTreeObject instanceof AssignmentExpression)) {
+//		parseTreeObject = parseTreeObject.getParent();
+//	  }
+//	  if (parseTreeObject != null) {
+//		if (this.aoiu_57_flag) {
+//		  d_aoiu_57 = LogReduction.AVOID;
+//		  logReduction("AOIU", "AOIU", "D Rule 57 => " + expression.toString());
+//		} else {
+//		  this.aoiu_57_flag = true;
+//		}
+//	  }
+//	}
+//		/*
+//		*   "term = BufferedArrayOutputStream v1; ... v1.write(..., ..., v2);
+//            transformations = {
+//              AOIU(v2) = -v2,
+//              LOI(v2) = ~v2
+//            }
+//            constraints = {
+//              v2 > 0,
+//              v2 can be any primitive numeric type
+//            }"
+//		* */
+//	boolean d_aoiu_56 = false;
+//	int limit = 5;
+//	ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
+//	while ((parseTreeObject != null) && !((parseTreeObject instanceof MethodCall)
+//		|| (parseTreeObject instanceof MethodDeclaration)) && (limit > 0)) {
+//	  limit--;
+//	  parseTreeObject = parseTreeObject.getParent();
+//	}
+//	try {
+//	  if (parseTreeObject instanceof MethodCall) {
+//		MethodCall methodCall = (MethodCall) parseTreeObject;
+//		if (methodCall.getName().equals("write")) {
+//		  //TODO: check if expression > 0
+//		  if (expression instanceof Literal) {
+//			Literal literal = (Literal) expression;
+//		  }
+//		}
+//
+//	  }
+//	} catch (ClassCastException ignored) {
+//
+//	}
+//	return d_aoiu_56 || d_aoiu_57;
+//  }
 
   private boolean isDuplicated(AssignmentExpression assignmentExpression) {
 	boolean d_aoiu_43 = false;

@@ -7,18 +7,29 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 public class DRuleUtils {
-  static Map<String, List<MutationInfo>> selectedOperators = new HashMap<>();
+  public enum MOperator {
+    AOIU,
+	ASRS
+  };
+  static Map<MOperator, List<MutationInfo>> selectedOperators = new HashMap<>();
   static Semaphore sem = new Semaphore(1, true);
+  static DRuleUtils instance = new DRuleUtils();
 
+  DRuleUtils () {
 
+  }
+
+  public static DRuleUtils access() {
+    return instance;
+  }
   /**
    * Checks whether a certain mutation was done with some operator
    * and then removes it from memory
    *
-   * @param operator  a String corresponding the operator intended to lookup
+   * @param operator  enum corresponding to the operator intended to lookup
    * @param operation the kind of mutation to lookup
    */
-  public boolean consumeOperation(String operator, MutationInfo operation) {
+  public boolean consumeOperation(MOperator operator, MutationInfo operation) {
 	boolean r = false;
 	try {
 	  synchronized (this) {
@@ -43,7 +54,7 @@ public class DRuleUtils {
    * @param operator  a String corresponding the operator intended to lookup
    * @param operation the kind of mutation to lookup
    */
-  public boolean insertMutation(String operator, MutationInfo operation) {
+  public boolean insertMutation(MOperator operator, MutationInfo operation) {
 	boolean r = false;
 	try {
 	  synchronized (this) {
