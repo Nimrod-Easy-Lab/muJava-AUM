@@ -43,3 +43,6 @@ buildNumber.properties
 
 examples/session1/classes/
 examples/session1/result/
+
+#Idea Files
+.idea/
