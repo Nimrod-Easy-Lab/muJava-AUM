@@ -20,6 +20,10 @@ public class DRuleUtils {
 
   }
 
+  public List<String> getAllOperatorsSelected() {
+   	return allOperatorsSelected;
+  }
+
   public boolean addMutation(MutationInfo mutationInfo) {
 	boolean ret = false;
 	try {

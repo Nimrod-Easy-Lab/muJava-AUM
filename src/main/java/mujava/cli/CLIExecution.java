@@ -213,6 +213,7 @@ public class CLIExecution {
 	  System.err.println("java mujava [options...] arguments...");
 	  cmdLineParser.printUsage(System.err);
 	  System.err.println();
+	  e.printStackTrace();
 	  deleteDirectory();
 	}
   }

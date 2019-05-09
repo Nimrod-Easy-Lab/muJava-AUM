@@ -18,6 +18,8 @@ package mujava.op.basic;
 import mujava.op.util.ExpressionAnalyzer;
 import mujava.op.util.LogReduction;
 import mujava.util.Debug;
+import mujava.util.drule.DRuleUtils;
+import mujava.util.drule.MutationInfo;
 import openjava.mop.FileEnvironment;
 import openjava.ptree.*;
 
@@ -50,6 +52,7 @@ public class ROR extends Arithmetic_OP {
 
   public ROR(FileEnvironment file_env, ClassDeclaration cdecl, CompilationUnit comp_unit) {
 	super(file_env, comp_unit);
+	allOperatorsSelected = DRuleUtils.access().getAllOperatorsSelected();
   }
 
   public ROR(FileEnvironment file_env, ClassDeclaration cdecl, CompilationUnit comp_unit, List<String> allOperators) {
@@ -145,11 +148,11 @@ public class ROR extends Arithmetic_OP {
 	// Updated by Nan Li
 	// Dec 6 2011
 
-	if (!isDuplicated(exp, Literal.makeLiteral(true))) {
+	if (!isDuplicated(exp, Literal.makeLiteral(true)) && !isDuplicated_49(exp, Literal.makeLiteral(true))) {
 	  // Change the expression to true
 	  outputToFile(exp, Literal.makeLiteral(true));
 	}
-	if (!isDuplicated(exp, Literal.makeLiteral(false))) {
+	if (!isDuplicated(exp, Literal.makeLiteral(false)) && !isDuplicated_49(exp, Literal.makeLiteral(false))) {
 	  // Change the expression to false
 	  outputToFile(exp, Literal.makeLiteral(false));
 	}
@@ -324,6 +327,47 @@ public class ROR extends Arithmetic_OP {
 	  System.err.println("errors during printing " + f_name);
 	  e.printStackTrace();
 	}
+  }
+
+  /**
+   * LOI_ROR 49 DRule implementation
+   * "term = if(v.length op1 0){ ... }
+   * transformations = {
+   * LOI(v.length) = ~v.length,
+   * ROR(op1) = op2
+   * }
+   * constraints = {
+   * op1 ∈ {<, <=, ==} and op2 ∈ {false} or
+   * op1 ∈ {>, >=, !=} and op2 ∈ {true},
+   * The type of v is String or Array
+   * }"
+   *
+   * @author Pedro Pinheiro
+   * @param original Original binary expression.
+   * @param mutant Mutated original boolean literal constant.
+   */
+  private boolean isDuplicated_49(BinaryExpression original, Literal mutant) {
+    boolean d_loi_ror_49 = false;
+   	int op1 = original.getOperator();
+
+   	boolean constraint1 = ((op1 == BinaryExpression.LESS) || (op1 == BinaryExpression.LESSEQUAL)
+		|| (op1 == BinaryExpression.EQUAL)) && mutant.equals(Literal.makeLiteral(false));
+   	boolean constraint2 = ((op1 == BinaryExpression.GREATER) || (op1 == BinaryExpression.GREATEREQUAL)
+		|| (op1 == BinaryExpression.NOTEQUAL)) && mutant.equals(Literal.makeLiteral(true));
+
+    ExpressionAnalyzer aexp = new ExpressionAnalyzer(original, this.getEnvironment());
+    //TODO: implement this feature in ExpressionAnalyzer
+    boolean hasFieldAccess = (original.getLeft() instanceof FieldAccess)
+		|| (original.getRight() instanceof FieldAccess);
+    boolean hasZeroLiteral = aexp.containsZeroLiteral();
+
+   	if ((constraint1 || constraint2) && hasFieldAccess && hasZeroLiteral && DRuleUtils.access().isOperatorSelected("LOI")) {
+		d_loi_ror_49 = LogReduction.AVOID;
+		logReduction("LOI", "ROR", "DRULE49 Triggered => "
+			+ original.toFlattenString());
+		System.out.println("Triggered DRule LOI_ROR 49 => " + original.toFlattenString());
+	}
+    return d_loi_ror_49;
   }
 
   /**
