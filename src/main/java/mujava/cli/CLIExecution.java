@@ -1,24 +1,18 @@
 package mujava.cli;
 
-import com.sun.org.apache.xerces.internal.xs.StringList;
-import com.sun.xml.internal.fastinfoset.util.StringArray;
 import mujava.AllMutantsGenerator;
 import mujava.MutationSystem;
 import mujava.OpenJavaException;
 import mujava.op.util.ExpressionAnalyzer;
 import mujava.util.Debug;
-import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.BooleanOptionHandler;
-import org.kohsuke.args4j.spi.StringArrayOptionHandler;
+import mujava.util.drule.DRuleUtils;
+import mujava.util.drule.MutationInfo;
+import org.kohsuke.args4j.*;
+import org.kohsuke.args4j.spi.*;
 
 import java.io.File;
 import java.nio.file.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -27,6 +21,7 @@ import java.util.Objects;
  * @author Pedro Pinheiro
  */
 public class CLIExecution {
+
   /**
    * All default class mutation operators
    */
@@ -192,11 +187,22 @@ public class CLIExecution {
     return acm.toString();
   }
 
-  void doMain(String[] args) throws Exception {
+  static ArrayList<String> concatArrayString(String[]... varargs) {
+    ArrayList<String> arrayStringToArrayList = new ArrayList<>();
+    for(String[] astr : varargs) {
+      if(astr != null)
+		for (String str : astr)
+		  if ((str != null) && str.length() > 0) arrayStringToArrayList.add(str);
+	}
+    return arrayStringToArrayList;
+  }
+
+  void doMain(String[] args) {
 	CmdLineParser cmdLineParser = new CmdLineParser(this);
 	try {
 	  cmdLineParser.parseArgument(args);
 	  if (arguments != null) {
+		DRuleUtils.access().setSelectedOperators(concatArrayString(traditionalMutantsOperators, classMutantsOperators));
 		System.out.println("Traditional mutant operators selected: " + toString(traditionalMutantsOperators) + ".");
 		System.out.println("Class mutant operators selected: " + toString(classMutantsOperators) + ".");
 		for (String i : arguments)
@@ -211,7 +217,7 @@ public class CLIExecution {
 	}
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
 	new CLIExecution().doMain(args);
   }
 }

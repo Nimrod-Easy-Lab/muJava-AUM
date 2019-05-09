@@ -192,7 +192,8 @@ public class ASRS extends MethodLevelMutator {
     if (asge.getOperator() == AssignmentExpression.ADD && (mutant.getOperator() == AssignmentExpression.SUB)
 	&& DRuleUtils.access().isOperatorSelected("AOIU")) {
 		d_aoiu_asrs43 = LogReduction.AVOID;
-		logReduction("43AOIU","ASRS", asge.toFlattenString() +
+	  System.out.println("Triggered AOIU_ASRS43 => "+ asge.toFlattenString());
+	  logReduction("43AOIU","ASRS", asge.toFlattenString() +
 			"=>" + mutant.toFlattenString());
 	}
     return d_aoiu_asrs43;
