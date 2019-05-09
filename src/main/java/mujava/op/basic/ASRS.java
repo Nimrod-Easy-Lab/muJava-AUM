@@ -15,9 +15,7 @@
  */
 package mujava.op.basic;
 
-import mujava.op.rules.DRule;
 import mujava.op.util.LogReduction;
-import mujava.util.drule.AOIUVariableMutation;
 import mujava.util.drule.DRuleUtils;
 import openjava.mop.FileEnvironment;
 import openjava.ptree.*;
@@ -191,13 +189,11 @@ public class ASRS extends MethodLevelMutator {
   * */
   private boolean isDuplicated(AssignmentExpression asge, AssignmentExpression mutant) {
     boolean d_aoiu_asrs43 = false;
-    if (asge.getOperator() == AssignmentExpression.ADD && (mutant.getOperator() == AssignmentExpression.SUB)) {
-	  AOIUVariableMutation aoiuVariableMutation = new AOIUVariableMutation((Variable) asge.getRight(),
-		  this.env.currentClassName());
-	  if (DRuleUtils.access().consumeOperation(DRuleUtils.MOperator.AOIU,aoiuVariableMutation)) {
-	    d_aoiu_asrs43 = LogReduction.AVOID;
-		logReduction("AOIU", "ASRS", "DAOIU_ASRS43 =>" + asge.toFlattenString());
-	  }
+    if (asge.getOperator() == AssignmentExpression.ADD && (mutant.getOperator() == AssignmentExpression.SUB)
+	&& DRuleUtils.access().isOperatorSelected("AOIU")) {
+		d_aoiu_asrs43 = LogReduction.AVOID;
+		logReduction("43AOIU","ASRS", asge.toFlattenString() +
+			"=>" + mutant.toFlattenString());
 	}
     return d_aoiu_asrs43;
   }

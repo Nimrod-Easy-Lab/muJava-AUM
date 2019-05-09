@@ -1,74 +1,65 @@
 package mujava.util.drule;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 public class DRuleUtils {
   public enum MOperator {
-    AOIU,
+	AOIU,
 	ASRS
-  };
-  static Map<MOperator, List<MutationInfo>> selectedOperators = new HashMap<>();
+  }
+
+  ;
   static Semaphore sem = new Semaphore(1, true);
   static DRuleUtils instance = new DRuleUtils();
+  static List<String> allOperatorsSelected = new ArrayList<>();
+  static List<MutationInfo> mutationInfoList = new ArrayList<>();
 
-  DRuleUtils () {
+  DRuleUtils() {
 
+  }
+
+  public boolean addMutation(MutationInfo mutationInfo) {
+	boolean ret = false;
+	try {
+	  synchronized (this) {
+		sem.acquire();
+		if (!mutationInfoList.contains(mutationInfo)) {
+		  ret = true;
+		  mutationInfoList.add(mutationInfo);
+		}
+		sem.release();
+	  }
+	} catch (InterruptedException e) {
+	  e.printStackTrace();
+	}
+	return ret;
+  }
+
+  public boolean containsMutation(MutationInfo mutationInfo) {
+	boolean ret = false;
+	try {
+	  synchronized (this) {
+		sem.acquire();
+		ret = mutationInfoList.contains(mutationInfo);
+		sem.release();
+	  }
+	} catch (InterruptedException e) {
+	  e.printStackTrace();
+	}
+	return ret;
+  }
+
+  public boolean isOperatorSelected(String op) {
+	return allOperatorsSelected.contains(op);
+  }
+
+  public void setSelectedOperators(List<String> allOperatorsSelected) {
+	this.allOperatorsSelected = allOperatorsSelected;
   }
 
   public static DRuleUtils access() {
-    return instance;
-  }
-  /**
-   * Checks whether a certain mutation was done with some operator
-   * and then removes it from memory
-   *
-   * @param operator  enum corresponding to the operator intended to lookup
-   * @param operation the kind of mutation to lookup
-   */
-  public boolean consumeOperation(MOperator operator, MutationInfo operation) {
-	boolean r = false;
-	try {
-	  synchronized (this) {
-		sem.acquire();
-		r = selectedOperators.containsKey(operator) && selectedOperators.get(operator).contains(operation);
-		if (r) {
-		  selectedOperators.get(operator).remove(operation);
-		  selectedOperators.remove(operator);
-		}
-		sem.release();
-	  }
-	} catch (InterruptedException e) {
-	  e.printStackTrace();
-	}
-	return r;
-  }
-
-  /**
-   * Inserts a certain mutation that was done with some operator
-   * and then removes it from memory
-   *
-   * @param operator  a String corresponding the operator intended to lookup
-   * @param operation the kind of mutation to lookup
-   */
-  public boolean insertMutation(MOperator operator, MutationInfo operation) {
-	boolean r = false;
-	try {
-	  synchronized (this) {
-		sem.acquire();
-		if (!selectedOperators.containsKey(operator)) selectedOperators.put(operator, new ArrayList<>());
-		if (!selectedOperators.get(operator).contains(operation)) {
-		  selectedOperators.get(operator).add(operation);
-		  r = true;
-		}
-		sem.release();
-	  }
-	} catch (InterruptedException e) {
-	  e.printStackTrace();
-	}
-	return r;
+	return instance;
   }
 }

@@ -17,10 +17,6 @@ package mujava.op.basic;
 
 import mujava.op.util.ExpressionAnalyzer;
 import mujava.op.util.LogReduction;
-import mujava.util.drule.AOIUVariableMutation;
-import mujava.util.drule.ASRSMutation;
-import mujava.util.drule.DRuleUtils;
-import mujava.util.drule.MutationInfo;
 import openjava.mop.FileEnvironment;
 import openjava.ptree.*;
 
@@ -77,7 +73,7 @@ public class AOIU extends Arithmetic_OP {
    * Generate AOIU mutant
    */
   public void visit(Variable p) throws ParseTreeException {
-	if (isArithmeticType(p) && !isDuplicated(p)) {
+	if (isArithmeticType(p)) {
 	  outputToFile(p);
 	}
   }
@@ -284,32 +280,6 @@ public class AOIU extends Arithmetic_OP {
   constraints = {
 
   }"*/
-  private boolean isDuplicated(Variable variable) {
-	boolean d_aoiu_asrs43 = false;
-	ParseTreeObject parseTreeObject = (ParseTreeObject) variable;
-	while (parseTreeObject!=null && !((parseTreeObject instanceof AssignmentExpression)
-		|| (parseTreeObject instanceof MethodDeclaration))) {
-	  parseTreeObject = parseTreeObject.getParent();
-	}
-	if (parseTreeObject instanceof AssignmentExpression) {
-	  AssignmentExpression asge = (AssignmentExpression) parseTreeObject;
-	  boolean variableIsSame = variable.equals(asge.getRight());
-	  if (variableIsSame && (asge.getOperator() == AssignmentExpression.ADD)) {
-	    //TODO: Check whether currentClassName returns fully qualified Class name
-		ASRSMutation duplicatedMutation = new ASRSMutation("+=", "-=",asge
-			,this.env.currentClassName());
-		if (DRuleUtils.access().consumeOperation(DRuleUtils.MOperator.ASRS,duplicatedMutation)) {
-		  d_aoiu_asrs43 = LogReduction.AVOID;
-		  logReduction("AOIU", "ASRS", "DAOIU_ASRS =>" + asge.toFlattenString());
-		} else {
-		  DRuleUtils.access().insertMutation(DRuleUtils.MOperator.AOIU,
-			  new AOIUVariableMutation(variable,this.env.currentClassName()));
-		}
-	  }
-	}
-	return d_aoiu_asrs43;
-  }
-
 //  private boolean isDuplicated(Expression expression) {
 //        /*
 //        * "term = type v := exp; ... return v;
