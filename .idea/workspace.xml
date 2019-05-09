@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d530e8e-9d99-438d-8d53-087e4c8796f7" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/mujava/cli/CLIExecution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/mujava/cli/CLIExecution.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
@@ -20,11 +21,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/mujava/op/basic/AOIU.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
+            <state relative-caret-position="-72">
               <caret line="275" selection-start-line="275" selection-end-line="275" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
-                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -33,7 +33,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/mujava/op/basic/Arithmetic_OP.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
+            <state relative-caret-position="180">
               <caret line="34" column="42" selection-start-line="34" selection-start-column="42" selection-end-line="34" selection-end-column="42" />
             </state>
           </provider>
@@ -42,8 +42,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/mujava/cli/CLIExecution.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
-              <caret line="177" column="75" lean-forward="true" selection-start-line="177" selection-start-column="75" selection-end-line="177" selection-end-column="75" />
+            <state relative-caret-position="241">
+              <caret line="210" lean-forward="true" selection-start-line="210" selection-end-line="210" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -52,19 +52,23 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="jar://$MAVEN_REPOSITORY$/args4j/args4j/2.33/args4j-2.33-sources.jar!/org/kohsuke/args4j/spi/BooleanOptionHandler.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/mujava/MutationSystem.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="10" column="24" lean-forward="true" selection-start-line="10" selection-start-column="24" selection-end-line="10" selection-end-column="24" />
+            <state relative-caret-position="248">
+              <caret line="112" column="23" selection-start-line="112" selection-start-column="23" selection-end-line="112" selection-end-column="23" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="jar://$MAVEN_REPOSITORY$/args4j/args4j/2.33/args4j-2.33-sources.jar!/org/kohsuke/args4j/spi/ExplicitBooleanOptionHandler.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/mujava/gui/MutantsGenPanel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="108">
-              <caret line="17" column="13" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
+            <state relative-caret-position="59">
+              <caret line="394" column="17" selection-start-line="394" selection-start-column="17" selection-end-line="394" selection-end-column="17" />
+              <folding>
+                <element signature="e#5136#5247#0" expanded="true" />
+                <element signature="e#5246#5247#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -74,12 +78,14 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>mujava.op.basic.ExpressionAnalyzer</find>
+      <find>mutation_log</find>
     </findStrings>
     <replaceStrings>
       <replace>mujava.op.util.ExpressionAnalyzer</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/src/main/java/mujava/op</dir>
+      <dir>C:\Users\pedro\Documents\muJava-Leo\src\main\java\mujava</dir>
     </dirStrings>
   </component>
   <component name="Git.Settings">
@@ -123,7 +129,52 @@
     <panes>
       <pane id="PackagesPane" />
       <pane id="Scope" />
-      <pane id="ProjectPane" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="muJava" type="b2602c69:ProjectViewProjectNode" />
+              <item name="muJava-Leo" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="muJava" type="b2602c69:ProjectViewProjectNode" />
+              <item name="muJava-Leo" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="muJava" type="b2602c69:ProjectViewProjectNode" />
+              <item name="muJava-Leo" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="muJava" type="b2602c69:ProjectViewProjectNode" />
+              <item name="muJava-Leo" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="muJava" type="b2602c69:ProjectViewProjectNode" />
+              <item name="muJava-Leo" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="mujava" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="muJava" type="b2602c69:ProjectViewProjectNode" />
+              <item name="muJava-Leo" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="mujava" type="462c0819:PsiDirectoryNode" />
+              <item name="gui" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -151,7 +202,7 @@
     <configuration name="cli" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="mujava.cli.CLIExecution" />
       <module name="muJava" />
-      <option name="PROGRAM_PARAMETERS" value="-i C:\Users\pedro\Documents\muJava-Leo\examples\session1\ -noc -co &quot;&quot; -to &quot;ROR&quot;" />
+      <option name="PROGRAM_PARAMETERS" value="-co &quot;&quot; -to &quot;ROR&quot; -noc C:\Users\pedro\Documents\muJava-Leo\examples\session1\src\" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -177,8 +228,8 @@
     <frame x="36" y="-8" width="1338" height="784" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5181818" visible="true" weight="0.21048513" />
-      <window_info id="Structure" order="1" sideWeight="0.48181817" side_tool="true" visible="true" weight="0.21048513" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5206107" weight="0.21048513" />
+      <window_info id="Structure" order="1" sideWeight="0.4793893" side_tool="true" weight="0.21048513" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
       <window_info id="UI Designer" order="4" />
@@ -187,8 +238,8 @@
       <window_info anchor="bottom" id="Messages" weight="0.32977098" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32824427" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32824427" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32824427" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -207,6 +258,37 @@
       <window_info anchor="right" id="Palette&#9;" order="7" />
       <window_info anchor="right" id="Database" order="8" />
     </layout>
+    <layout-to-restore>
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.5206107" visible="true" weight="0.21048513" />
+      <window_info id="Structure" order="1" sideWeight="0.4793893" side_tool="true" visible="true" weight="0.21048513" />
+      <window_info id="Image Layers" order="2" />
+      <window_info id="Designer" order="3" />
+      <window_info id="UI Designer" order="4" />
+      <window_info id="Capture Tool" order="5" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="Messages" order="0" weight="0.32977098" />
+      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info anchor="bottom" id="Find" order="2" weight="0.32824427" />
+      <window_info anchor="bottom" id="Run" order="3" weight="0.32824427" />
+      <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="7" />
+      <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="9" />
+      <window_info anchor="bottom" id="Database Changes" order="10" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32977098" />
+      <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" id="Theme Preview" order="4" />
+      <window_info anchor="right" id="Maven" order="5" weight="0.22613458" />
+      <window_info anchor="right" id="Capture Analysis" order="6" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" id="Database" order="8" />
+    </layout-to-restore>
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -215,29 +297,23 @@
           <properties class="java.lang.StringIndexOutOfBoundsException" package="java.lang" />
           <option name="timeStamp" value="5" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/mujava/cli/CLIExecution.java</url>
+          <line>94</line>
+          <properties />
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/mujava/cli/CLIExecution.java</url>
+          <line>141</line>
+          <properties />
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/main/java/mujava/op/util/ExpressionAnalyzer.java" />
-    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/op/basic/AOIU.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="275" selection-start-line="275" selection-end-line="275" />
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/op/basic/Arithmetic_OP.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="34" column="42" selection-start-line="34" selection-start-column="42" selection-end-line="34" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/mujava/op/basic/AORB.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="282">
@@ -286,13 +362,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/args4j/args4j/2.33/args4j-2.33-sources.jar!/org/kohsuke/args4j/spi/BooleanOptionHandler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="10" column="24" lean-forward="true" selection-start-line="10" selection-start-column="24" selection-end-line="10" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/args4j/args4j/2.33/args4j-2.33-sources.jar!/org/kohsuke/args4j/spi/OptionHandler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1115">
@@ -307,10 +376,87 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/args4j/args4j/2.33/args4j-2.33-sources.jar!/org/kohsuke/args4j/spi/BooleanOptionHandler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="10" column="24" lean-forward="true" selection-start-line="10" selection-start-column="24" selection-end-line="10" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/gui/util/SummaryTableModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="588">
+          <caret line="108" selection-start-line="108" selection-end-line="108" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/gui/util/CMSummaryTableModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="24" column="48" selection-start-line="24" selection-start-column="48" selection-end-line="24" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/gui/ClassMutantsViewerPanel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="588">
+          <caret line="142" selection-start-line="142" selection-end-line="142" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/java-1.8.0-openjdk-1.8.0.201-2.b09.redhat.windows.x86_64/src.zip!/java/awt/Window.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="817" column="16" selection-start-line="817" selection-start-column="16" selection-end-line="817" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/op/basic/Arithmetic_OP.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="34" column="42" selection-start-line="34" selection-start-column="42" selection-end-line="34" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/op/basic/AOIU.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-72">
+          <caret line="275" selection-start-line="275" selection-end-line="275" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/gui/GenMutantsMain.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="61" column="35" selection-start-line="61" selection-start-column="35" selection-end-line="61" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/gui/MutantsGenPanel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="59">
+          <caret line="394" column="17" selection-start-line="394" selection-start-column="17" selection-end-line="394" selection-end-column="17" />
+          <folding>
+            <element signature="e#5136#5247#0" expanded="true" />
+            <element signature="e#5246#5247#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/mujava/MutationSystem.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="248">
+          <caret line="112" column="23" selection-start-line="112" selection-start-column="23" selection-end-line="112" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/mujava/cli/CLIExecution.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="177" column="75" lean-forward="true" selection-start-line="177" selection-start-column="75" selection-end-line="177" selection-end-column="75" />
+        <state relative-caret-position="241">
+          <caret line="210" lean-forward="true" selection-start-line="210" selection-end-line="210" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
