@@ -15,11 +15,16 @@
  */
 package mujava.op.basic;
 
+import mujava.op.rules.DRule;
 import mujava.op.util.ExpressionAnalyzer;
 import mujava.op.util.LogReduction;
+import mujava.util.drule.DRuleUtils;
 import openjava.mop.FileEnvironment;
+import openjava.mop.OJClass;
 import openjava.ptree.*;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -73,7 +78,7 @@ public class AOIU extends Arithmetic_OP {
    * Generate AOIU mutant
    */
   public void visit(Variable p) throws ParseTreeException {
-	if (isArithmeticType(p)) {
+	if (isArithmeticType(p) && !isDuplicated(p)) {
 	  outputToFile(p);
 	}
   }
@@ -381,5 +386,44 @@ public class AOIU extends Arithmetic_OP {
 	  }
 	}
 	return d_aoiu_43;
+  }
+
+  /** DRule AOIU_LOI 56
+   * Avoid duplicated mutants that matches the following conditions:
+   * term = BufferedArrayOutputStream v1; ... v1.write(..., ..., v2);
+   * transformations = {
+   *   AOIU(v2) = -v2,
+   *   LOI(v2) = ~v2
+   * }
+   * constraints = {
+   *   v2 > 0,
+   *   v2 can be any primitive numeric type
+   * }
+   * @param variable
+   */
+  private boolean isDuplicated(Variable variable) {
+    boolean d_aoiu_loi56 = false;
+    ParseTreeObject pto = (ParseTreeObject) variable;
+    while (pto!=null && !((pto instanceof MethodCall) || (pto instanceof MethodDeclaration) )) pto = pto.getParent();
+    if (pto instanceof MethodCall) {
+      MethodCall mc = (MethodCall) pto;
+      boolean v1condition = false;
+      boolean v2isNumericGtZero = false;
+      try {
+        //TODO: How can i see Variable value ?
+		OJClass variableOjc = variable.getType(this.getEnvironment()).primitiveWrapper();
+		Class referenceExprOjc = mc.getReferenceExpr().getType(this.getEnvironment()).getCompatibleJavaClass();
+		if (referenceExprOjc != null && referenceExprOjc.isAssignableFrom(BufferedOutputStream.class)) v1condition = true;
+	  } catch (Exception ignored) {
+
+	  }
+      if (v1condition && v2isNumericGtZero && DRuleUtils.access().isOperatorSelected("LOI")) {
+        d_aoiu_loi56 = LogReduction.AVOID;
+        logReduction("AOIU", "LOI","Triggered D AOIU_LOI56" + pto.toFlattenString());
+        System.out.println("Triggered D AOIU_LOI56" + pto.toFlattenString());
+	  }
+
+	}
+    return d_aoiu_loi56;
   }
 }
