@@ -16,6 +16,7 @@
 package mujava.op.basic;
 
 import mujava.op.util.LogReduction;
+import mujava.util.drule.DRuleUtils;
 import openjava.mop.FileEnvironment;
 import openjava.ptree.*;
 
@@ -46,6 +47,7 @@ public class SDL extends MethodLevelMutator {
 
   public SDL(FileEnvironment file_env, ClassDeclaration cdecl, CompilationUnit comp_unit) {
 	super(file_env, comp_unit);
+	allOperatorsSelected = DRuleUtils.access().getAllOperatorsSelected();
 
   }
 
@@ -164,7 +166,8 @@ public class SDL extends MethodLevelMutator {
 	IfStatement ifMutantStatement = new IfStatement(ifStatement.getExpression(), ifStatement.getStatements());
 	ifMutantStatement.setElseStatements(ifStatement.getElseStatements());
 	ifMutantStatement.setExpression(expressionTrue);
-	if (!isDuplicated(ifStatement, SDLMutations.CONDITIONAL_EXPRESSION_AFFIRMATION)) {
+	boolean d_ror_sdl51 = isDuplicated(ifStatement, ifMutantStatement);
+	if (!isDuplicated(ifStatement, SDLMutations.CONDITIONAL_EXPRESSION_AFFIRMATION) && !d_ror_sdl51) {
 	  outputToFile(ifStatement, ifMutantStatement);
 	}
 	// ifMutantStatement.setExpression(expressionFalse);
@@ -846,6 +849,42 @@ public class SDL extends MethodLevelMutator {
 	  }
 	}
 	return false;
+  }
+
+  /**
+   * DRULE 52 ROR_SDL
+   * Avoid generating duplicated mutants given following conditions:
+   * term = if(exp1 || exp2){ ... }
+   * transformations = {
+   *   ROR(exp1) = true,
+   *   SDL(exp1 || exp2) = true
+   * }
+   * constraints = {
+   *
+   * }
+   * @author Pedro Pinheiro
+   * @param ifStatement IfStatement subject to mutation
+   * @param mutant Literal that will replace IfStatement expression
+   */
+  private boolean isDuplicated(IfStatement ifStatement, IfStatement mutant){
+    boolean d_cor_sdl52 = false;
+    Object[] c = ifStatement.getContents();
+    if (((c != null) && (c.length > 0)) && (c[0] instanceof BinaryExpression)) {
+      BinaryExpression binaryExpression = (BinaryExpression) ifStatement.getExpression();
+      if (binaryExpression.getOperator() == BinaryExpression.LOGICAL_OR) {
+        boolean condition1 = mutant.getExpression().toString().equals("true");
+		boolean condition2 = DRuleUtils.access().isOperatorSelected("ROR");
+        if ( condition1 &&	condition2) {
+          System.out.flush();
+		  System.out.println("Triggered DRULE_COR_SDL 52 : " + ifStatement.toFlattenString()
+		  + "=> " + mutant.toFlattenString());
+		  d_cor_sdl52 = LogReduction.AVOID;
+          logReduction("ROR", "SDL", "Triggered DRULE_COR_SDL 52 => "
+			  + ifStatement.toFlattenString());
+		}
+	  }
+	}
+    return d_cor_sdl52;
   }
 
   /**
