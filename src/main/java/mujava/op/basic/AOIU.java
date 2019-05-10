@@ -299,6 +299,8 @@ public class AOIU extends Arithmetic_OP {
 	    MethodDeclaration md = (MethodDeclaration) pto2;
 	    StatementList sl = md.getBody();
 		System.out.println(42);
+		boolean variableHasAssignmentExpression = false;
+		boolean variableIsNotModifiedUntilReturn = false;
 		for (int i = 0; i < sl.size(); i++) {
 		}
 	  }
