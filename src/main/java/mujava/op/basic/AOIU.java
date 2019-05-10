@@ -22,6 +22,7 @@ import openjava.ptree.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * <p>
@@ -270,6 +271,39 @@ public class AOIU extends Arithmetic_OP {
 
 	}
 	return aoiu15;
+  }
+
+  /**
+   * DRrule AOIU_AOIU57
+   * Avoid duplicated mutants that matches the following conditions:
+   * term = type v := exp; ... return v;
+   * transformations = {
+   *   AOIU(exp) = -exp,
+   *   AOIU(v) = -v
+   * }
+   * constraints = {
+   *   There is no definition of v between definition and the use in a return statement,
+   *   v can be any primitive numeric type
+   * }
+   * @author Pedro Pinheiro
+   */
+  private boolean isDuplicated(Variable variable) {
+    ParseTreeObject pto = variable;
+	for(int limit = 3;pto != null && (limit >= 0 ) && !(pto instanceof ReturnStatement); limit--, pto=pto.getParent());
+	if (pto instanceof ReturnStatement) {
+	  ReturnStatement rts = (ReturnStatement) pto;
+
+	  ParseTreeObject pto2 = rts;
+	  for(;pto2 != null && !(pto2 instanceof MethodDeclaration); pto2=pto2.getParent());
+	  if (pto2 instanceof MethodDeclaration) {
+	    MethodDeclaration md = (MethodDeclaration) pto2;
+	    StatementList sl = md.getBody();
+		System.out.println(42);
+		for (int i = 0; i < sl.size(); i++) {
+		}
+	  }
+	}
+    boolean d_aoiu_aoiu57;
   }
 
  /*"term = v1 += v2
