@@ -19,7 +19,6 @@ import mujava.op.util.ExpressionAnalyzer;
 import mujava.op.util.LogReduction;
 import mujava.util.Debug;
 import mujava.util.drule.DRuleUtils;
-import mujava.util.drule.MutationInfo;
 import openjava.mop.FileEnvironment;
 import openjava.ptree.*;
 
@@ -147,12 +146,15 @@ public class ROR extends Arithmetic_OP {
 	// Note here the mutant is a type of Literal not a binary expression
 	// Updated by Nan Li
 	// Dec 6 2011
-
-	if (!isDuplicated(exp, Literal.makeLiteral(true)) && !isDuplicated_49(exp, Literal.makeLiteral(true))) {
+	boolean drule_70 = isDuplicated_70(exp, Literal.constantTrue());
+	boolean drule_70_2 = isDuplicated_70(exp, Literal.constantFalse());
+	if (!isDuplicated(exp, Literal.makeLiteral(true)) && !isDuplicated_49(exp, Literal.makeLiteral(true))
+		&& !drule_70) {
 	  // Change the expression to true
 	  outputToFile(exp, Literal.makeLiteral(true));
 	}
-	if (!isDuplicated(exp, Literal.makeLiteral(false)) && !isDuplicated_49(exp, Literal.makeLiteral(false))) {
+	if (!isDuplicated(exp, Literal.makeLiteral(false)) && !isDuplicated_49(exp, Literal.makeLiteral(false))
+		&& !drule_70_2) {
 	  // Change the expression to false
 	  outputToFile(exp, Literal.makeLiteral(false));
 	}
@@ -342,32 +344,95 @@ public class ROR extends Arithmetic_OP {
    * The type of v is String or Array
    * }"
    *
-   * @author Pedro Pinheiro
    * @param original Original binary expression.
-   * @param mutant Mutated original boolean literal constant.
+   * @param mutant   Mutated original boolean literal constant.
+   * @author Pedro Pinheiro
    */
   private boolean isDuplicated_49(BinaryExpression original, Literal mutant) {
-    boolean d_loi_ror_49 = false;
-   	int op1 = original.getOperator();
+	boolean d_loi_ror_49 = false;
+	int op1 = original.getOperator();
 
-   	boolean constraint1 = ((op1 == BinaryExpression.LESS) || (op1 == BinaryExpression.LESSEQUAL)
+	boolean constraint1 = ((op1 == BinaryExpression.LESS) || (op1 == BinaryExpression.LESSEQUAL)
 		|| (op1 == BinaryExpression.EQUAL)) && mutant.equals(Literal.makeLiteral(false));
-   	boolean constraint2 = ((op1 == BinaryExpression.GREATER) || (op1 == BinaryExpression.GREATEREQUAL)
+	boolean constraint2 = ((op1 == BinaryExpression.GREATER) || (op1 == BinaryExpression.GREATEREQUAL)
 		|| (op1 == BinaryExpression.NOTEQUAL)) && mutant.equals(Literal.makeLiteral(true));
 
-    ExpressionAnalyzer aexp = new ExpressionAnalyzer(original, this.getEnvironment());
-    //TODO: implement this feature in ExpressionAnalyzer
-    boolean hasFieldAccess = (original.getLeft() instanceof FieldAccess)
+	ExpressionAnalyzer aexp = new ExpressionAnalyzer(original, this.getEnvironment());
+	//TODO: implement this feature in ExpressionAnalyzer
+	boolean hasFieldAccess = (original.getLeft() instanceof FieldAccess)
 		|| (original.getRight() instanceof FieldAccess);
-    boolean hasZeroLiteral = aexp.containsZeroLiteral();
+	boolean hasZeroLiteral = aexp.containsZeroLiteral();
 
-   	if ((constraint1 || constraint2) && hasFieldAccess && hasZeroLiteral && DRuleUtils.access().isOperatorSelected("LOI")) {
-		d_loi_ror_49 = LogReduction.AVOID;
-		logReduction("LOI", "ROR", "DRULE49 Triggered => "
-			+ original.toFlattenString());
-		System.out.println("Triggered DRule LOI_ROR 49 => " + original.toFlattenString());
+	if ((constraint1 || constraint2) && hasFieldAccess && hasZeroLiteral && DRuleUtils.access().isOperatorSelected("LOI")) {
+	  d_loi_ror_49 = LogReduction.AVOID;
+	  logReduction("LOI", "ROR", "DRULE49 Triggered => "
+		  + original.toFlattenString());
+	  System.out.println("Triggered DRule LOI_ROR 49 => " + original.toFlattenString());
 	}
-    return d_loi_ror_49;
+	return d_loi_ror_49;
+  }
+
+  /**
+   * Avoid duplicated mutants given following conditions
+   * "term = if(vArgs.length == 0){...}
+   * transformations = {
+   * ROR(==) = !=,
+   * ROR(==) = >
+   * }
+   * constraints = {
+   * the type of v is String or Array
+   * }"
+   *
+   * @param original
+   * @param mutant
+   * @return
+   * @author Pedro Pinheiro
+   */
+  private boolean isDuplicated_66(BinaryExpression original, BinaryExpression mutant) {
+	boolean d_ror_ror66 = false;
+	ParseTreeObject pto = mutant;
+	for (; pto != null && !(pto instanceof IfStatement || pto instanceof MethodDeclaration); pto = pto.getParent()) {
+	}
+	if (pto instanceof IfStatement) {
+	  ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(original, this.getEnvironment());
+	  if (expressionAnalyzer.containsZeroLiteral() && expressionAnalyzer.containsLengthMethodCall()
+		  && (expressionAnalyzer.containsString() || expressionAnalyzer.containsArray()))
+		switch (mutant.getOperator()) {
+		  case BinaryExpression.NOTEQUAL://--let this one happen case BinaryExpression.GREATEREQUAL:
+			d_ror_ror66 = LogReduction.AVOID;
+			logReduction("ROR", "ROR", original.toFlattenString()
+				+ " => " + mutant.toFlattenString());
+			System.out.println("Triggered DRule 66 ROR_ROR" + original.toFlattenString()
+				+ " => " + mutant.toFlattenString());
+		}
+	}
+	return d_ror_ror66;
+  }
+
+  private boolean isDuplicated_70(BinaryExpression original, Expression mutant) {
+	boolean d_ror_sdl70 = false;
+	ParseTreeObject pto = original;
+	for (; pto != null && !(pto instanceof ReturnStatement || pto instanceof MethodDeclaration); pto = pto.getParent()) {
+	}
+	if (pto instanceof ReturnStatement && DRuleUtils.access().isOperatorSelected("SDL")) {
+	  switch (original.getOperator()) {
+		case BinaryExpression.EQUAL:
+		case BinaryExpression.NOTEQUAL:
+		case BinaryExpression.LESS:
+		case BinaryExpression.GREATER:
+		case BinaryExpression.LESSEQUAL:
+		case BinaryExpression.GREATEREQUAL:
+		  if (mutant instanceof Literal &&
+			  (((Literal) mutant).equals(Literal.constantTrue())
+				  || (((Literal) mutant).equals(Literal.constantFalse())))) {
+		    d_ror_sdl70 = LogReduction.AVOID;
+		    logReduction("ROR", "SDL", "Triggered d_ror_sdl70:" +
+				pto.toFlattenString() + "=>" + mutant.toFlattenString());
+		    System.out.println("Triggered DRule ror_sdl70: " + original + " => " + mutant);
+		  }
+	  }
+	}
+	return d_ror_sdl70;
   }
 
   /**
@@ -380,7 +445,6 @@ public class ROR extends Arithmetic_OP {
    */
   private boolean isDuplicated(BinaryExpression exp, Expression mutant) {
 	if (mutant instanceof Literal) {
-	  if (isDuplicated_d51(exp, (Literal) mutant) == LogReduction.AVOID) return LogReduction.AVOID;
 	  // #Rule 1: SDL x ROR(1) (delete or negate a conditional)
 	  // Eg.: if(x>10) => [SDL] Delete x [ROR] if(false)
 	  if (mutant.equals(Literal.makeLiteral(false))) {
@@ -409,76 +473,13 @@ public class ROR extends Arithmetic_OP {
 		  }
 		}
 	  }
-	}
-        /* ROR D Rule 66
-        "term = if(vArgs.length == 0){...}
-        transformations = {
-          ROR(==) = !=,
-          ROR(==) = >
-        }
-        constraints = {
-          the type of v is String or Array
-        }"
-        * */
-	else if (mutant instanceof BinaryExpression) {
-	  BinaryExpression mutant_ = (BinaryExpression) mutant;
-	  if (exp.getOperator() == BinaryExpression.EQUAL && ((mutant_.getOperator()
-		  == BinaryExpression.NOTEQUAL) || (mutant_.getOperator() == BinaryExpression.GREATER))) {
-		ParseTreeObject parseTreeObject = exp;
-
-		while ((parseTreeObject != null) && !(parseTreeObject instanceof IfStatement))
-		  parseTreeObject = parseTreeObject.getParent();
-
-		ExpressionAnalyzer expressionAnalyzer = new ExpressionAnalyzer(exp, this.getEnvironment());
-		//Means its inside an if statement
-		if ((parseTreeObject != null) && (expressionAnalyzer.containsString() ||
-			expressionAnalyzer.containsArray()) && expressionAnalyzer.containsLengthMethodCall() &&
-			expressionAnalyzer.containsZeroLiteral()) {
-		  if (this.d_ror66_flag) {
-			logReduction("ROR", "ROR",
-				"ROR D 66 => " + exp.toFlattenString());
-			d_ror66_flag = false;
-			return LogReduction.AVOID;
-		  } else
-			d_ror66_flag = true;
-		}
-	  }
+	} else if (mutant instanceof BinaryExpression) {
+	  return isDuplicated_66(exp, (BinaryExpression) mutant);
 	}
 	return false;
   }
 
-  private boolean isDuplicated_d51(Expression expression, Literal mutant) {
-	boolean d_cor51 = false;
-	if (expression instanceof BinaryExpression) {
-	  BinaryExpression binaryExpression = (BinaryExpression) expression;
-	  if (binaryExpression.getOperator() == BinaryExpression.LOGICAL_OR &&
-		  mutant.equals(Literal.makeLiteral(true)) &&
-		  (allOperatorsSelected.contains("ROR") || allOperatorsSelected.contains("SDL"))) {
-		d_cor51 = LogReduction.AVOID;
-	  }
-	} else {
-	  try {
-		int limit = 5;
-		ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
-		//Go up until we find a BinaryExpression parent
-		while (limit > 0 && (parseTreeObject != null) && !(parseTreeObject instanceof BinaryExpression)) {
-		  parseTreeObject = parseTreeObject.getParent();
-		  limit--;
-		}
-		if (parseTreeObject instanceof BinaryExpression)
-		  //Check d_rule 51 conditions for parent BinarayExpression
-		  d_cor51 = isDuplicated((BinaryExpression) parseTreeObject, mutant);
-	  } catch (Exception ignored) {
-
-	  }
-	}
-
-	return d_cor51;
-  }
-
   private boolean isEquivalent(BinaryExpression exp, int op1, int op2) {
-	Debug.println("Checking if is equivalent.");
-
 	boolean e_rule_13 = false;
 	boolean e_rule_20 = false;
 	boolean e_rule_23 = false;
