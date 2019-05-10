@@ -190,9 +190,12 @@ public class Mutator extends mujava.openjava.extension.VariableBinder {
 	name = dir_name + "/" + MutationSystem.CLASS_NAME + ".java";
 	return name;
   }
-
   public PrintWriter getPrintWriter(String f_name) throws IOException {
 	File outfile = new File(f_name);
+	//Added by Pedro Pinheiro. Fix: create needed directories if they aren't present.
+	if (!outfile.getParentFile().exists()) {
+	  outfile.getParentFile().mkdirs();
+	}
 	FileWriter fout = new FileWriter(outfile);
 	PrintWriter out = new PrintWriter(fout);
 	return out;
