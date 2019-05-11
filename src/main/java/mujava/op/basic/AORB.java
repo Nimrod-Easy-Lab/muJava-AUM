@@ -201,18 +201,24 @@ public class AORB extends Arithmetic_OP {
 	return false;
   }
 
+  /**
+   * Avoid equivalent mutants given the following criteria:
+   * E-Rule 21
+   * "term = StringBuilder v1 = new StringBuilder(v2 op1 2);
+   * transformations = {
+   * AOR(op1) = op2
+   * }
+   * constraints = {
+   * v1 and v2 hold a primitive data type,
+   * op1 ∈ {+, -, *, /, %}
+   * }"
+   *
+   * @param binaryExpression
+   * @return
+   * @author Pedro Pinheiro
+   */
   public boolean isEquivalent(BinaryExpression binaryExpression) {
 	boolean erule21 = false;
-      /* E-Rule 21
-        "term = StringBuilder v1 = new StringBuilder(v2 op1 2);
-        transformations = {
-          AOR(op1) = op2
-        }
-        constraints = {
-           v1 and v2 hold a primitive data type,
-           op1 ∈ {+, -, *, /, %}
-        }"
-       */
 	int limit = 5;
 	ParseTreeObject checked = binaryExpression.getParent();
 	while ((limit > 0) && (checked != null) && !(checked instanceof AllocationExpression)) {
@@ -221,14 +227,48 @@ public class AORB extends Arithmetic_OP {
 	}
 
 	if (checked instanceof AllocationExpression) {
-	  AllocationExpression allocationExpression = (AllocationExpression) checked;
-	  String allocationExpressionName = allocationExpression.getClassType().getName();
-	  if (allocationExpressionName.equals("java.lang.StringBuilder")) {
+	  boolean              v1TypeIsStringBuilder = false,
+			               v2IsPrimitive         = false;
+	  Literal 			   literal               = null;
+	  Expression           v2Expression          = null;
+	  AllocationExpression allocationExpression  = (AllocationExpression) checked;
+
+	  if (literal == null && binaryExpression.getLeft() instanceof Literal)
+		literal = (Literal) binaryExpression.getLeft();
+
+	  else if (v2Expression == null)
+		v2Expression = binaryExpression.getLeft();
+
+	  if (literal == null && binaryExpression.getRight() instanceof Literal)
+		literal = (Literal) binaryExpression.getRight();
+
+	  else if (v2Expression == null)
+		v2Expression = binaryExpression.getLeft();
+
+	  if (v2Expression != null) {
+		try {
+		  v2IsPrimitive = isArithmeticType(v2Expression);
+		} catch (Exception ignored) {
+
+		}
+	  }
+
+	  try {
+		v1TypeIsStringBuilder
+			= allocationExpression.getClassType().getClass().isAssignableFrom(StringBuilder.class);
+	  } catch (Exception ignored) {
+
+	  }
+//	  String allocationExpressionName = allocationExpression.getClassType().getName();
+	  if (v1TypeIsStringBuilder && literal != null && v2Expression != null && v2IsPrimitive) {
+
 		ExpressionList allocationExpressionList = allocationExpression.getArguments();
+
 		if (allocationExpressionList.get(0) instanceof BinaryExpression) {
 		  BinaryExpression mainBinaryExpression = (BinaryExpression) allocationExpressionList.get(0);
 		  ExpressionAnalyzer analyzer = new ExpressionAnalyzer(mainBinaryExpression,
 			  this.getEnvironment());
+
 		  if (!analyzer.containsString()) {
 			switch (mainBinaryExpression.getOperator()) {
 			  case BinaryExpression.TIMES:

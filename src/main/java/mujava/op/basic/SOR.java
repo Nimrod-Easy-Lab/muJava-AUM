@@ -119,6 +119,21 @@ public class SOR extends MethodLevelMutator {
 	}
   }
 
+  /**
+   * Avoid duplicated mutants given following criteria:
+   * "term = v << exp;
+   * transformations = {
+   *   SOR(<<) = >>,
+   *   SOR(<<) = >>>
+   * }
+   * constraints = {
+   *   v has to be positive (v > 0)
+   * }"
+   * @param binaryExpression
+   * @param op2
+   * @author Pedro Pinheiro
+   * @return
+   */
   public boolean isDuplicated(BinaryExpression binaryExpression, int op2) {
 	boolean d_sor46 = false;
 	if ((binaryExpression.getOperator() == BinaryExpression.SHIFT_L)

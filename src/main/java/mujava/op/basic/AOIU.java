@@ -22,7 +22,6 @@ import openjava.ptree.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 
 /**
  * <p>
@@ -74,7 +73,7 @@ public class AOIU extends Arithmetic_OP {
    * Generate AOIU mutant
    */
   public void visit(Variable p) throws ParseTreeException {
-	if (isArithmeticType(p)) {
+	if (isArithmeticType(p) && !isDuplicated(p)) {
 	  outputToFile(p);
 	}
   }
@@ -276,135 +275,107 @@ public class AOIU extends Arithmetic_OP {
    * Avoid duplicated mutants that matches the following conditions:
    * term = type v := exp; ... return v;
    * transformations = {
-   *   AOIU(exp) = -exp,
-   *   AOIU(v) = -v
+   * AOIU(exp) = -exp,
+   * AOIU(v) = -v
    * }
    * constraints = {
-   *   There is no definition of v between definition and the use in a return statement,
-   *   v can be any primitive numeric type
+   * There is no definition of v between definition and the use in a return statement,
+   * v can be any primitive numeric type
    * }
+   *
    * @author Pedro Pinheiro
    */
   private boolean isDuplicated(Variable variable) {
-	boolean d_aoiu_aoiu57 = false;
-    ParseTreeObject pto = variable;
-	for(int limit = 3;pto != null && (limit >= 0 ) && !(pto instanceof ReturnStatement); limit--, pto=pto.getParent());
+	boolean isArithmeticType = false, d_aoiu_aoiu57 = false;
+	try {
+	  isArithmeticType = isArithmeticType(variable);
+	} catch (ParseTreeException ignored) {
+	}
+	if (!isArithmeticType) return false;
+
+
+	ParseTreeObject pto = variable;
+	for (int limit = 3; pto != null && (limit >= 0) && !(pto instanceof ReturnStatement); limit--, pto = pto.getParent()) {
+	}
 	if (pto instanceof ReturnStatement) {
 	  ReturnStatement rts = (ReturnStatement) pto;
 
 	  ParseTreeObject pto2 = rts;
-	  for(;pto2 != null && !(pto2 instanceof MethodDeclaration); pto2=pto2.getParent());
-	  if (pto2 instanceof MethodDeclaration) {
-	    MethodDeclaration md = (MethodDeclaration) pto2;
-	    StatementList sl = md.getBody();
+	  for (; pto2 != null && !(pto2 instanceof MethodDeclaration); pto2 = pto2.getParent()) {
+	  }
+	  if (pto2 != null) {
+		MethodDeclaration md = (MethodDeclaration) pto2;
+		StatementList sl = md.getBody();
 		System.out.println(42);
-		boolean variableHasAssignmentExpression = false;
-		boolean variableIsNotModifiedUntilReturn = false;
+		boolean variableWasDeclared = false;
+		boolean variableIsNotModifiedUntilReturn = true;
 		for (int i = 0; i < sl.size(); i++) {
+		  Statement st = sl.get(i);
+		  if (st.getClass().isAssignableFrom(ExpressionStatement.class)) {
+			Expression exp = ((ExpressionStatement) st).getExpression();
+			if (exp instanceof VariableDeclaration) {
+			  if (((VariableDeclaration) exp).getVariableDeclarator().getVariable().equals(variable.toString()))
+				variableWasDeclared = true;
+			} else if (exp instanceof AssignmentExpression) {
+			  if (variableWasDeclared && ((AssignmentExpression) exp).getLeft().equals(variable))
+				variableIsNotModifiedUntilReturn = false;
+			} else if (exp instanceof UnaryExpression) {
+			  if (variableWasDeclared && ((UnaryExpression) exp).getExpression().equals(variable))
+				variableIsNotModifiedUntilReturn = false;
+			} else if (exp instanceof MethodCall) {
+			  //Going conservative
+//			ExpressionList args = ((MethodCall) st).getArguments();
+//			for(int k = 0; k < args.size(); k++) {
+//			  Expression exp = args.get(k);
+//			  ParseTree pt = exp;
+			  variableIsNotModifiedUntilReturn = false;
+			  break;
+			}
+		  } else {
+		  if (st instanceof VariableDeclaration) {
+			if (((VariableDeclaration) st).getVariableDeclarator().getVariable().equals(variable.toString()))
+			  variableWasDeclared = true;
+		  } else if (st instanceof AssignmentExpression) {
+			if (variableWasDeclared && ((AssignmentExpression) st).getLeft().equals(variable))
+			  variableIsNotModifiedUntilReturn = false;
+		  } else if (st instanceof UnaryExpression) {
+			if (variableWasDeclared && ((UnaryExpression) st).getExpression().equals(variable))
+			  variableIsNotModifiedUntilReturn = false;
+		  } else if (st instanceof MethodCall) {
+			//Going conservative
+//			ExpressionList args = ((MethodCall) st).getArguments();
+//			for(int k = 0; k < args.size(); k++) {
+//			  Expression exp = args.get(k);
+//			  ParseTree pt = exp;
+			variableIsNotModifiedUntilReturn = false;
+			break;
+		  }
 		}
 	  }
+	  if (variableWasDeclared && variableIsNotModifiedUntilReturn) {
+		d_aoiu_aoiu57 = LogReduction.AVOID;
+		logReduction("AOIU", "AOIU", "AOIU_AOIU57 => " + variable.toFlattenString());
+		System.out.println("AOIU_AOIU57 => " + variable.toFlattenString());
+	  }
 	}
+  }
 	return d_aoiu_aoiu57;
-  }
+}
 
- /*"term = v1 += v2
-  transformations = {
-	AOIU(v2) = -v2 ,
-		ASRS(+=) = -=;
-  }
-  constraints = {
-
-  }"*/
-//  private boolean isDuplicated(Expression expression) {
-//        /*
-//        * "term = type v := exp; ... return v;
-//            transformations = {
-//              AOIU(exp) = -exp,
-//              AOIU(v) = -v
-//            }
-//            constraints = {
-//              There is no definition of v between definition and the use in a return statement,
-//              v can be any primitive numeric type
-//            }"
-//        * */
-//	//TODO: there's another problem with using aoiu_57_flag : we need to check its lifetime
-//	boolean d_aoiu_57 = false;
-//	if (expression instanceof Variable) {
-//	  if (this.aoiu_57_flag) {
-//
-//		d_aoiu_57 = LogReduction.AVOID;
-//		logReduction("AOIU", "AOIU", "D Rule 57 => " + expression.toString());
-//	  } else {
-//		Variable v = (Variable) expression;
-//		ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
-//		while ((parseTreeObject != null) && !(parseTreeObject instanceof MethodDeclaration)) {
-//		  parseTreeObject = parseTreeObject.getParent();
-//		}
-//		if (parseTreeObject != null) {
-//		  MethodDeclaration methodDeclaration = (MethodDeclaration) parseTreeObject;
-//		  StatementList body = methodDeclaration.getBody();
-//		  boolean redefinition_flag = false;
-//		  for (int i = 0; i < body.size(); i++) {
-//			ParseTree e = body.get(i);
-//			if (!(e instanceof ReturnStatement)) {
-//			  if (e.toFlattenString().contains(v.toFlattenString())) redefinition_flag = true;
-//			}
-//		  }
-//
-//		  if (!redefinition_flag) this.aoiu_57_flag = true;
-//		}
-//	  }
-//
-//	} else {
-//	  ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
-//	  while ((parseTreeObject != null) && !(parseTreeObject instanceof AssignmentExpression)) {
-//		parseTreeObject = parseTreeObject.getParent();
-//	  }
-//	  if (parseTreeObject != null) {
-//		if (this.aoiu_57_flag) {
-//		  d_aoiu_57 = LogReduction.AVOID;
-//		  logReduction("AOIU", "AOIU", "D Rule 57 => " + expression.toString());
-//		} else {
-//		  this.aoiu_57_flag = true;
-//		}
-//	  }
-//	}
-//		/*
-//		*   "term = BufferedArrayOutputStream v1; ... v1.write(..., ..., v2);
-//            transformations = {
-//              AOIU(v2) = -v2,
-//              LOI(v2) = ~v2
-//            }
-//            constraints = {
-//              v2 > 0,
-//              v2 can be any primitive numeric type
-//            }"
-//		* */
-//	boolean d_aoiu_56 = false;
-//	int limit = 5;
-//	ParseTreeObject parseTreeObject = (ParseTreeObject) expression;
-//	while ((parseTreeObject != null) && !((parseTreeObject instanceof MethodCall)
-//		|| (parseTreeObject instanceof MethodDeclaration)) && (limit > 0)) {
-//	  limit--;
-//	  parseTreeObject = parseTreeObject.getParent();
-//	}
-//	try {
-//	  if (parseTreeObject instanceof MethodCall) {
-//		MethodCall methodCall = (MethodCall) parseTreeObject;
-//		if (methodCall.getName().equals("write")) {
-//		  //TODO: check if expression > 0
-//		  if (expression instanceof Literal) {
-//			Literal literal = (Literal) expression;
-//		  }
-//		}
-//
-//	  }
-//	} catch (ClassCastException ignored) {
-//
-//	}
-//	return d_aoiu_56 || d_aoiu_57;
-//  }
-
+  /**
+   * Avoid duplicated mutants given following criteria:
+   * "term = v1 += v2
+   * transformations = {
+   *   AOIU(v2) = -v2 ,
+   *   ASRS(+=) = -=;
+   * }
+   * constraints = {
+   *
+   * }"
+   * @param assignmentExpression
+   * @author Pedro Pinheiro
+   * @return
+   */
   private boolean isDuplicated(AssignmentExpression assignmentExpression) {
 	boolean d_aoiu_43 = false;
 

@@ -1,0 +1,24 @@
+ROR_1:23:boolean_ror_sdl70_strigger(): a == b  =>   a > b
+ROR_2:23:boolean_ror_sdl70_strigger(): a == b  =>   a >= b
+ROR_3:23:boolean_ror_sdl70_strigger(): a == b  =>   a < b
+ROR_4:23:boolean_ror_sdl70_strigger(): a == b  =>   a <= b
+ROR_5:23:boolean_ror_sdl70_strigger(): a == b  =>   a != b
+ROR_6:29:boolean_ror_sdl70_strigger1(): this.string.length == b  =>   this.string.length > b
+ROR_7:29:boolean_ror_sdl70_strigger1(): this.string.length == b  =>   this.string.length >= b
+ROR_8:29:boolean_ror_sdl70_strigger1(): this.string.length == b  =>   this.string.length < b
+ROR_9:29:boolean_ror_sdl70_strigger1(): this.string.length == b  =>   this.string.length <= b
+ROR_10:29:boolean_ror_sdl70_strigger1(): this.string.length == b  =>   this.string.length != b
+ROR_11:35:boolean_ror_sdl70_strigger2(): a.length == 0  =>   a.length > 0
+ROR_12:35:boolean_ror_sdl70_strigger2(): a.length == 0  =>   a.length >= 0
+ROR_13:35:boolean_ror_sdl70_strigger2(): a.length == 0  =>   a.length < 0
+ROR_14:35:boolean_ror_sdl70_strigger2(): a.length == 0  =>   a.length <= 0
+ROR_15:35:boolean_ror_sdl70_strigger2(): a.length == 0  =>   a.length != 0
+SDL_1:16:ClassId_0(): string = new java.lang.String[2]; string[0] = \"Hello\"; string[1] = \"World!\";  =>   string[0] = \"Hello\"; string[1] = \"World!\";
+SDL_2:16:ClassId_0(): string = new java.lang.String[2]; string[0] = \"Hello\"; string[1] = \"World!\";  =>   string = new java.lang.String[2]; string[1] = \"World!\";
+SDL_3:16:ClassId_0(): string = new java.lang.String[2]; string[0] = \"Hello\"; string[1] = \"World!\";  =>   string = new java.lang.String[2]; string[0] = \"Hello\";
+SDL_4:24:boolean_ror_sdl70_strigger(): return a == b;  =>   return true;
+SDL_5:24:boolean_ror_sdl70_strigger(): return a == b;  =>   return false;
+SDL_6:30:boolean_ror_sdl70_strigger1(): return this.string.length == b;  =>   return true;
+SDL_7:30:boolean_ror_sdl70_strigger1(): return this.string.length == b;  =>   return false;
+SDL_8:36:boolean_ror_sdl70_strigger2(): return a.length == 0;  =>   return true;
+SDL_9:36:boolean_ror_sdl70_strigger2(): return a.length == 0;  =>   return false;

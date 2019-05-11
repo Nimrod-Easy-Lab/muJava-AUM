@@ -102,16 +102,20 @@ public class JSD extends mujava.op.util.Mutator {
 	}
   }
 
+  /**
+   * Avoid equivalent mutants given the following criteria:
+   * "term = private static final type := value;
+   * transformations = {
+   * JSD(static) = ;
+   * }
+   * constraints = {
+   *
+   * }"
+   * @author Pedro Pinheiro
+   * @param fieldDeclaration
+   * @return
+   */
   public boolean isEquivalent(FieldDeclaration fieldDeclaration) {
-       /*
-        "term = private static final type := value;
-        transformations = {
-          JSD(static) = ;
-        }
-        constraints = {
-
-        }"
-        */
 	boolean e_rule_22 = false;
 	if (fieldDeclaration.getModifiers().contains(ModifierList.PRIVATE) &&
 		fieldDeclaration.getModifiers().contains(ModifierList.STATIC) &&

@@ -18,6 +18,8 @@ package mujava.op.basic;
 import mujava.op.util.ContextInfo;
 import mujava.op.util.LogReduction;
 import openjava.mop.FileEnvironment;
+import openjava.mop.OJClass;
+import openjava.mop.OJSystem;
 import openjava.ptree.*;
 
 import java.io.IOException;
@@ -489,19 +491,32 @@ public class AOIS extends Arithmetic_OP {
   }
 
   /**
-   * Avoid generate duplicated mutants
-   *
+   * Avoid generate duplicated mutants given following criteria:
+   * "term = v ... v;
+   * transformations = {
+   *   AOIS(v) = v op,
+   *   AOIS(v) = op v
+   * }
+   * constraints = {
+   *   the type of v is int,
+   *   op ∈ {++, --}
+   * }"
    * @param original
    * @param mutant
-   * @return
-   * @throws ParseTreeException
+   *
+   * @author Pedro Pinheiro
    */
-  private boolean isDuplicated(Expression original, Expression mutant) {
-	// #Rule 1: AOIS x ROR - If there is a AOIS inside a ROR, and that ROR
-	// transformation
-	// change
-	//
+  private boolean isDuplicated(Variable original, Expression mutant) {
+	boolean d_aois_aois69 = false;
 
+	boolean variableIsint = false;
+	try {
+	  variableIsint = getType(original) == OJSystem.INT;
+	} catch (Exception ignored) {
+	}
+	if (variableIsint) {
+
+	}
 	return false;
   }
 
