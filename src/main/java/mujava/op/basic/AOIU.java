@@ -212,18 +212,24 @@ public class AOIU extends Arithmetic_OP {
 	}
   }
 
+  /**
+   * Avoid equivalent mutants given following criteria:
+   * ERule AOIU12
+   * "term = while (exp) { int v1; ... v2 = v1; }
+   * transformations = {
+   *   AOIS(v1) = v1 op
+   * }
+   * constraints = {
+   *   v1 has a local scope (inside the loop body),
+   *   the use of v1 is the last one in the RHS of the loop,
+   *   op ∈ {++, --}
+   * }"
+   * @param exp
+   * @return true when matches criteria. False otherwise.
+   * @author Pedro Pinheiro
+   */
   boolean isEquivalent(AssignmentExpression exp) {
 	boolean aoiu12 = false;
-        /*
-		AOIU 12
-        "term = v1 %= v2;
-        transformations = {
-          AOIU(v2) = -v2
-        }
-        constraints = {
-
-        }"
-		*/
 	if (exp.getOperator() == AssignmentExpression.MOD) {
 	  aoiu12 = LogReduction.AVOID;
 	  System.out.println("[TOUCHDOWN] ERULE AOIU12 >>>>> " + exp.toFlattenString());
@@ -231,19 +237,24 @@ public class AOIU extends Arithmetic_OP {
 	return aoiu12;
   }
 
+    /**
+   * Avoid equivalent mutants given following criteria:
+   * ERule AOIU15
+   *"term = while (exp) { int v1; ... v2 = v1; }
+   * transformations = {
+   *   AOIS(v1) = v1 op
+   * }
+   * constraints = {
+   *   v1 has a local scope (inside the loop body),
+   *   the use of v1 is the last one in the RHS of the loop,
+   *   op ∈ {++, --}
+   * }"
+   * @param exp
+   * @return true when matches criteria. False otherwise.
+   * @author Pedro Pinheiro
+   */
   boolean isEquivalent(BinaryExpression exp) {
 	boolean aoiu15 = false;
-	boolean aoiu12 = false;
-		/*
-		AOIU 15
-		"term = if(exp op 0){...}
-			transformations = {
-			  AOIU(exp) = -exp
-			}
-			constraints = {
-			  op ∈ {==, !=}
-			}"
-		 */
 	ExpressionAnalyzer aexp = new ExpressionAnalyzer(exp, this.getEnvironment());
 	if (aexp.containsZeroLiteral() && aexp.isInsideIf()) {
 	  aoiu15 = LogReduction.AVOID;
@@ -256,19 +267,6 @@ public class AOIU extends Arithmetic_OP {
 		  aoiu15 = false;
 		  break;
 	  }
-	}
-        /*
-		AOIU 12
-        "term = v1 %= v2;
-        transformations = {
-          AOIU(v2) = -v2
-        }
-        constraints = {
-
-        }"
-		*/
-	if (aexp.getRootOperator().equals(ExpressionAnalyzer.BinaryOperator.MOD)) {
-
 	}
 	return aoiu15;
   }
@@ -288,6 +286,7 @@ public class AOIU extends Arithmetic_OP {
    * @author Pedro Pinheiro
    */
   private boolean isDuplicated(Variable variable) {
+	boolean d_aoiu_aoiu57 = false;
     ParseTreeObject pto = variable;
 	for(int limit = 3;pto != null && (limit >= 0 ) && !(pto instanceof ReturnStatement); limit--, pto=pto.getParent());
 	if (pto instanceof ReturnStatement) {
@@ -305,7 +304,7 @@ public class AOIU extends Arithmetic_OP {
 		}
 	  }
 	}
-    boolean d_aoiu_aoiu57;
+	return d_aoiu_aoiu57;
   }
 
  /*"term = v1 += v2

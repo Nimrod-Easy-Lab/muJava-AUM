@@ -325,6 +325,124 @@ public class AOIS extends Arithmetic_OP {
   }
 
   /**
+   * Avoid generate equivalent mutants given following criteria:
+   * ERule 11
+   * "term = while (exp) { int v1; ... v2 = v1; }
+   * transformations = {
+   * AOIS(v1) = v1 op
+   * }
+   * constraints = {
+   * v1 has a local scope (inside the loop body),
+   * the use of v1 is the last one in the RHS of the loop,
+   * op ∈ {++, --}
+   * }"
+   *
+   * @author Pedro Pinheiro
+   */
+  private boolean isEquivalent(Expression exp) {
+	boolean erule_11 = false;
+	ParseTreeObject pto = (ParseTreeObject) exp;
+	for (; pto != null && !(exp instanceof WhileStatement || exp instanceof MethodDeclaration); pto = pto.getParent()) {
+	}
+	if (pto instanceof WhileStatement) {
+
+	}
+	return erule_11;
+  }
+
+  /**
+   * Avoid generate equivalent mutants given following criteria:
+   * ERule 19
+   * "term = v1 := v2; ... v2 := exp;
+   * transformations = {
+   * AOIS(v2) = v2 op
+   * }
+   * constraints = {
+   * There is no use of v2 between the use and the re-definition,
+   * op ∈ {++, --}
+   * }"
+   *
+   * @author Pedro Pinheiro
+   */
+  private boolean isEquivalent(Variable variable) {
+	boolean e_aois19 = false;
+	ParseTreeObject pto = variable;
+	//Check if parent of variable is an assignment expression or an variable declaration
+	for (; pto != null && !(pto instanceof VariableDeclaration ||
+		pto instanceof AssignmentExpression || pto instanceof MethodDeclaration); pto = pto.getParent()) {
+	}
+
+	if (pto instanceof VariableDeclaration) {
+//     	if (((VariableDeclaration) pto ).getVariableDeclarator().getInitializer())
+	} else if (pto instanceof AssignmentExpression) {
+	  // if it is an assignment expression, v2 has to be at the right side of it
+	  if (((AssignmentExpression) pto).getRight().equals(variable)) {
+		ParseTreeObject mdecl = pto;
+		// go up until method declaration to get it's body
+		for (; mdecl != null && !(mdecl instanceof MethodDeclaration); mdecl = mdecl.getParent()) {
+		}
+		if (mdecl != null) {
+		  // get the statement list
+		  StatementList stList = ((MethodDeclaration) mdecl).getBody();
+		  boolean v2ReuseFound = false, //Flag to control whether there was no use
+			  // of v2 between first use and redefinition
+			  v2RedefinitionFound = false, //Flag to control whether v2 redefinition was found
+			  v2FirstUseFound = false; //Flag to control whether v2 first use was found
+		  // iterate over method statements
+
+		  for (int i = 0; (i < stList.size()) && !v2ReuseFound; i++) {
+			// get the statement from the statement list
+			Statement statement = stList.get(i);
+			// check whether the statement references v2
+			if (statement.toFlattenString().contains(variable.toString())) {
+			  if (statement instanceof ExpressionStatement) {
+				Expression expression = ((ExpressionStatement) statement).getExpression();
+				// if v2 is in an assignment expression
+				if (expression instanceof AssignmentExpression) {
+				  AssignmentExpression assignmentExpression =
+					  (AssignmentExpression) ((ExpressionStatement) statement).getExpression();
+
+				  // check whether v2 stands at the left, if yes and we haven't been found v2 redefinition
+				  // mark v2 redefinition.
+				  if (assignmentExpression.getLeft().equals(variable) && (!v2RedefinitionFound) && v2FirstUseFound) {
+					v2RedefinitionFound = true;
+					// if we've found v2 redefinition already, then this statement is v2 reuse.
+				  } else if (assignmentExpression.getLeft().equals(variable) && v2RedefinitionFound) {
+					v2ReuseFound = true;
+					// if v2 is at right and we've been trough first use, this is v2 reuse
+				  } else if (assignmentExpression.getRight().toFlattenString().contains(variable.toString())
+					  && v2FirstUseFound) {
+					v2ReuseFound = true;
+					// if v2 is at right and we haven't been trough first use, this is v2 first use
+				  } else if (assignmentExpression.getRight().toFlattenString().contains(variable.toString())
+					  && !v2FirstUseFound) {
+				    v2FirstUseFound = true;
+				  }
+				  // This is it for assignment expressions.
+
+				  //If its any other kind of statement
+				} else if (expression.toFlattenString().contains(variable.toString())) {
+				  if (v2FirstUseFound)
+				    v2ReuseFound = true;
+				  else
+				    v2FirstUseFound = true;
+				}
+				//This is it for ExpressionStatement Statements.
+
+
+			  } else if (v2RedefinitionFound) {
+
+			  }
+			}
+		  }
+		}
+	  }
+
+	}
+	return e_aois19;
+  }
+
+  /**
    * Avoid generate equivalent mutants
    *
    * @param original
