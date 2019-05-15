@@ -231,7 +231,8 @@ public class AOIU extends Arithmetic_OP {
 	boolean aoiu12 = false;
 	if (exp.getOperator() == AssignmentExpression.MOD) {
 	  aoiu12 = LogReduction.AVOID;
-	  System.out.println("[TOUCHDOWN] ERULE AOIU12 >>>>> " + exp.toFlattenString());
+	  logReduction("AOIU", "Triggered ERule 12:" +exp + " => " +"++ or --");
+	  System.out.println("Triggered ERule 12:" + exp.toFlattenString());
 	}
 	return aoiu12;
   }
@@ -260,7 +261,8 @@ public class AOIU extends Arithmetic_OP {
 	  switch (aexp.getRootOperator()) {
 		case EQUALS:
 		case DIFFERENT:
-		  System.out.println("AOIU E15 >>>> " + exp.toFlattenString());
+		  logReduction("AOIU", "Triggered Erule 15: " + exp + " => " + "== or !=");
+		  System.out.println("Triggered Erule 15: " + exp + " => " + "== or !=");
 		  break;
 		default:
 		  aoiu15 = false;

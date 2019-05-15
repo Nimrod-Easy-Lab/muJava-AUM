@@ -18,17 +18,21 @@ package mujava.op.basic;
 import mujava.op.util.LogReduction;
 import mujava.util.drule.DRuleUtils;
 import openjava.mop.FileEnvironment;
-import openjava.ptree.*;
+import openjava.ptree.AssignmentExpression;
+import openjava.ptree.ClassDeclaration;
+import openjava.ptree.CompilationUnit;
+import openjava.ptree.ParseTreeException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
  * <p>Generate ASRS (Assignment Operator Replacement (short-cut)) mutants --
- *    replace each occurrence of one of the assignment operators 
- *    (+=, -+, *=, /=, %=, &=, |=, ^=, <<=, >>=, >>>=) by each of the 
- *    other operators  
+ * replace each occurrence of one of the assignment operators
+ * (+=, -+, *=, /=, %=, &=, |=, ^=, <<=, >>=, >>>=) by each of the
+ * other operators
  * </p>
+ *
  * @author Yu-Seung Ma
  * @version 1.0
  */
@@ -46,11 +50,11 @@ public class ASRS extends MethodLevelMutator {
 
   /**
    * If the assignment operator is of arithmetic type (+=, -=, *=, /=, %=),
-   *    replace it with each of the other arithmetic assignment operators.
+   * replace it with each of the other arithmetic assignment operators.
    * If the assignment operator is of logical type (&=, |=, ^=),
-   *    replace it with each of the other logical assignment operators.
+   * replace it with each of the other logical assignment operators.
    * If the assignment operator is a shift operator (<<, >>, >>>)
-   *    replace it with each of the other shift operators.
+   * replace it with each of the other shift operators.
    */
   public void visit(AssignmentExpression p) throws ParseTreeException {
 	int op = p.getOperator();
@@ -91,7 +95,7 @@ public class ASRS extends MethodLevelMutator {
 	if (!(op == AssignmentExpression.SUB)) {
 	  mutant = (AssignmentExpression) (p.makeRecursiveCopy());
 	  mutant.setOperator(AssignmentExpression.SUB);
-	  if (!isDuplicated(p,mutant))
+	  if (!isDuplicated(p, mutant))
 		outputToFile(p, mutant);
 	}
 	if (!(op == AssignmentExpression.MOD)) {
@@ -149,6 +153,7 @@ public class ASRS extends MethodLevelMutator {
 
   /**
    * Output ASRS mutants to file
+   *
    * @param original
    * @param mutant
    */
@@ -178,24 +183,36 @@ public class ASRS extends MethodLevelMutator {
   }
 
   /*
-  * "term = v1 += v2
-  transformations = {
-	AOIU(v2) = -v2 ,
-	ASRS(+=) = -=;
-  }
-  constraints = {
+   *
 
-  }"
-  * */
+   * */
+
+  /**
+   * Avoid duplicated mutants given the following criteria:
+   * DRule AOIU_ASRS 43
+   * "term = v1 += v2
+   * transformations = {
+   * AOIU(v2) = -v2 ,
+   * ASRS(+=) = -=;
+   * }
+   * constraints = {
+   * <p>
+   * }"
+   *
+   * @param asge
+   * @param mutant
+   * @return
+   * @author Pedro Pinheiro
+   */
   private boolean isDuplicated(AssignmentExpression asge, AssignmentExpression mutant) {
-    boolean d_aoiu_asrs43 = false;
-    if (asge.getOperator() == AssignmentExpression.ADD && (mutant.getOperator() == AssignmentExpression.SUB)
-	&& DRuleUtils.access().isOperatorSelected("AOIU")) {
-		d_aoiu_asrs43 = LogReduction.AVOID;
-	  System.out.println("Triggered AOIU_ASRS43 => "+ asge.toFlattenString());
-	  logReduction("43AOIU","ASRS", asge.toFlattenString() +
-			"=>" + mutant.toFlattenString());
+	boolean d_aoiu_asrs43 = false;
+	if (asge.getOperator() == AssignmentExpression.ADD && (mutant.getOperator() == AssignmentExpression.SUB)
+		&& DRuleUtils.access().isOperatorSelected("AOIU")) {
+	  d_aoiu_asrs43 = LogReduction.AVOID;
+	  System.out.println("Triggered AOIU_ASRS43 => " + asge.toFlattenString());
+	  logReduction("AOIU", "ASRS",  "Triggered AOIU_ASRS43" + asge.toFlattenString() +
+		  "=>" + mutant.toFlattenString());
 	}
-    return d_aoiu_asrs43;
+	return d_aoiu_asrs43;
   }
 }

@@ -277,8 +277,10 @@ public class AORB extends Arithmetic_OP {
 			  case BinaryExpression.PLUS:
 			  case BinaryExpression.MINUS:
 				erule21 = LogReduction.AVOID;
-				System.out.println("[TOUCHDOWN] AORB->ERULE21 >>>>> "
-					+ allocationExpression.toFlattenString());
+				logReduction("AORB","Triggered Erule 21: " + allocationExpression + " => " +
+				"{*,/,%,+,-}");
+				System.out.println("Triggered Erule 21: " + allocationExpression + " => " +
+				"{*,/,%,+,-}");
 				break;
 			}
 		  }

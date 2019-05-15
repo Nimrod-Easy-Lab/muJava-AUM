@@ -104,6 +104,7 @@ public class JSD extends mujava.op.util.Mutator {
 
   /**
    * Avoid equivalent mutants given the following criteria:
+   * Erule 22
    * "term = private static final type := value;
    * transformations = {
    * JSD(static) = ;
@@ -122,7 +123,10 @@ public class JSD extends mujava.op.util.Mutator {
 		fieldDeclaration.getModifiers().contains(ModifierList.FINAL) &&
 		fieldDeclaration.getTypeSpecifier().equals(String.class)) {
 	  e_rule_22 = LogReduction.AVOID;
-	  System.out.println("JSD E22 rule for expression >>>>" + fieldDeclaration.toFlattenString());
+	  logReduction("JSD","Triggered Erule 22: " + fieldDeclaration + " => " +
+		  "[nothing]");
+	  System.out.println("Triggered Erule 22: " + fieldDeclaration + " => " +
+		  "[nothing]");
 	}
 	return e_rule_22;
   }

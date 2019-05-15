@@ -365,8 +365,8 @@ public class ROR extends Arithmetic_OP {
 
 	if ((constraint1 || constraint2) && hasFieldAccess && hasZeroLiteral && DRuleUtils.access().isOperatorSelected("LOI")) {
 	  d_loi_ror_49 = LogReduction.AVOID;
-	  logReduction("LOI", "ROR", "DRULE49 Triggered => "
-		  + original.toFlattenString());
+	  logReduction("LOI", "ROR", "DRule LOI_ROR 49 Triggered"
+		  + original.toFlattenString() + " => " + mutant);
 	  System.out.println("Triggered DRule LOI_ROR 49 => " + original.toFlattenString());
 	}
 	return d_loi_ror_49;
@@ -374,6 +374,7 @@ public class ROR extends Arithmetic_OP {
 
   /**
    * Avoid duplicated mutants given following conditions
+   * Drule ROR_ROR 66
    * "term = if(vArgs.length == 0){...}
    * transformations = {
    * ROR(==) = !=,
@@ -410,6 +411,22 @@ public class ROR extends Arithmetic_OP {
 	return d_ror_ror66;
   }
 
+  /**
+   * Avoid duplicated mutants given following criteria:
+   * "term = return exp1 op exp2;
+   * transformations = {
+   *   ROR(exp1 op exp2) = exp3,
+   *   SDL(return exp1 op exp2) = return exp3
+   * }
+   * constraints = {
+   *   op ∈ {==, !=, <, >, <=, >=},
+   *   op ∈ {true, false}
+   * }"
+   * @param original
+   * @param mutant
+   * @return
+   * @author Pedro Pinheiro
+   */
   private boolean isDuplicated_70(BinaryExpression original, Expression mutant) {
 	boolean d_ror_sdl70 = false;
 	ParseTreeObject pto = original;
@@ -519,6 +536,7 @@ public class ROR extends Arithmetic_OP {
    * @param op1
    * @param op2
    * @return
+   * @author Pedro Pinheiro
    */
   private boolean isEquivalent(BinaryExpression exp, int op1, int op2) {
 	boolean e_rule_13 = false,
@@ -533,25 +551,29 @@ public class ROR extends Arithmetic_OP {
 		  case DIFFERENT:
 			if (op2 == BinaryExpression.LESS || (op2 == BinaryExpression.GREATER)) {
 			  e_rule_13 = LogReduction.AVOID;
-			  System.out.println("E-Rule 13 >>>> " + exp.toString() + " op2: " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+			  logReduction("ROR","Triggered Erule ROR 13: " + exp.toString() + " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+			  System.out.println("Triggered Erule ROR 13: " + exp.toString() + " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
 			}
 			break;
 		  case GREATER:
 			if (op2 == BinaryExpression.NOTEQUAL) {
 			  e_rule_13 = LogReduction.AVOID;
-			  System.out.println("E-Rule 13 >>>> " + exp.toString() + " op2: " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+			  logReduction("ROR","Triggered Erule ROR 13: " + exp.toString() + " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+			  System.out.println("Triggered Erule ROR 13: " + exp.toString() + " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
 			}
 			break;
 		  case LESSER:
 			if (op2 == BinaryExpression.NOTEQUAL) {
 			  e_rule_13 = LogReduction.AVOID;
-			  System.out.println("E-Rule 13 >>>> " + exp.toString() + " op2: " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+			  logReduction("ROR","Triggered Erule ROR 13: " + exp.toString() + " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+			  System.out.println("Triggered Erule ROR 13: " + exp.toString() + " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
 			}
 			break;
 		  case EQUALS:
 			if (op2 == BinaryExpression.LESSEQUAL) {
 			  e_rule_13 = LogReduction.AVOID;
-			  System.out.println("E-Rule 13 >>>> " + exp.toString() + " op2: " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+			  logReduction("ROR","Triggered Erule ROR 13: " + exp.toString() + " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+			  System.out.println("Triggered Erule ROR 13: " + exp.toString() + " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
 			}
 			break;
 		  default:
@@ -574,7 +596,10 @@ public class ROR extends Arithmetic_OP {
 					  (aexp.getRootOperator() == ExpressionAnalyzer.BinaryOperator.GREATER) &&
 						  top2 == ExpressionAnalyzer.BinaryOperator.GREATEREQUAL) {
 					//ACTIVATE RULE
-					System.out.println("[TOUCHDOWN] ROR ERULE 20 >>>>>> " + exp.toFlattenString());
+					System.out.println( "Triggered ERule 13:" + exp.toFlattenString()
+					+ " => " + top2);
+					logReduction("ROR", "Triggered ERule 13:" + exp.toFlattenString()
+					+ " => " + top2);
 					e_rule_22 = LogReduction.AVOID;
 				  }
 				}
@@ -605,7 +630,10 @@ public class ROR extends Arithmetic_OP {
 				if (((op1 == BinaryExpression.EQUAL) && (op2 == BinaryExpression.GREATEREQUAL)) ||
 					((op1 == BinaryExpression.EQUAL) && (op2 == BinaryExpression.LESSEQUAL))) {
 				  e_rule_23 = LogReduction.AVOID;
-				  System.out.println("ROR E23 >>>>> " + exp.toFlattenString());
+				  System.out.println("Triggered ERule 23:" + exp.toFlattenString()
+					+ " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
+					logReduction("ROR","Triggered ERule 23:" + exp.toFlattenString()
+					+ " => " + ExpressionAnalyzer.translateFromBinaryExpression(op2));
 				}
 			  }
 			}
