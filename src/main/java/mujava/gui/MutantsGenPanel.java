@@ -22,6 +22,7 @@ import mujava.OpenJavaException;
 import mujava.TraditionalMutantsGenerator;
 import mujava.op.util.LogReduction;
 import mujava.util.Debug;
+import mujava.util.drule.DRuleUtils;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -377,6 +378,7 @@ public class MutantsGenPanel extends JPanel {
 		allOperatorsSelected.add(op);
 	  }
 	}
+	DRuleUtils.access().setSelectedOperators(allOperatorsSelected);
 	// -------------------------------------------
 
 	if ((class_ops == null || class_ops.length == 0) && (traditional_ops == null || traditional_ops.length == 0)) {
