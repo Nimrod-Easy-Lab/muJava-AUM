@@ -41,6 +41,7 @@ import java.util.List;
 public class TraditionalMutantsGeneratorCLI extends TraditionalMutantsGenerator {
 
   HashMap<String, List<String>> traditionalOpMap;
+  private List<String> allOperatorsSelected;
 
 
   public TraditionalMutantsGeneratorCLI(File f) {
