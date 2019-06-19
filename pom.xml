@@ -18,7 +18,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>mujava.gui.GenMutantsMain</mainClass>
+							<mainClass>mujava.cli.CLIExecution</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

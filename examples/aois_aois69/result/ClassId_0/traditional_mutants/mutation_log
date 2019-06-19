@@ -1,0 +1,10 @@
+AOIS_1:24:void_aoiu_aoiu69_strigger():a => ++a
+AOIS_2:24:void_aoiu_aoiu69_strigger():a => --a
+AOIS_3:24:void_aoiu_aoiu69_strigger():a => a++
+AOIS_4:24:void_aoiu_aoiu69_strigger():a => a--
+AOIS_5:24:void_aoiu_aoiu69_strigger():a => ++a
+AOIS_6:24:void_aoiu_aoiu69_strigger():a => --a
+AOIS_7:24:void_aoiu_aoiu69_strigger():a => a++
+AOIS_8:24:void_aoiu_aoiu69_strigger():a => a--
+AOIS_9:24:void_aoiu_aoiu69_strigger():a => ++a
+AOIS_10:24:void_aoiu_aoiu69_strigger():a => --a
