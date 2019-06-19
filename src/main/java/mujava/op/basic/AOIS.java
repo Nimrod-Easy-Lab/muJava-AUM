@@ -66,7 +66,6 @@ public class AOIS extends Arithmetic_OP {
 		POSINCREMENT_INSERTION, POSDECREMENT_INSERTION, PREINCREMENT_INSERTION, PREDECREMENT_INSERTION;
 	}
 
-	
 	private ContextInfo contextInfo;
 	boolean isPrePostEQ = true;
 	private boolean isInsideAReturnStatement;
@@ -75,6 +74,7 @@ public class AOIS extends Arithmetic_OP {
 
 	ArrayList<Variable> lastReferenceOfAVariableInReturn = new ArrayList<Variable>();
 	ArrayList<Variable> lastReferenceOfAVariableInMethod = new ArrayList<Variable>();
+	ArrayList<Variable> lastReferenceOfAVariableInLoop = new ArrayList<Variable>();
 
 	private java.util.List<String> allOperatorsSelected;
 
@@ -144,7 +144,7 @@ public class AOIS extends Arithmetic_OP {
 				if (obj instanceof NonLeaf) {
 					NonLeaf nl = (NonLeaf) obj;
 					if (nl instanceof VariableDeclaration) {
-						this.localVariables.add(((VariableDeclaration) nl).getVariable());
+						this.methodLocalVariables.add(((VariableDeclaration) nl).getVariable());
 					}
 					checkVariables(nl.getContents(), variables);
 				} else if (obj instanceof List) {
@@ -173,8 +173,8 @@ public class AOIS extends Arithmetic_OP {
 		// uniqueVars.add(var.toString());
 		// }
 		// }
-		if (localVariables != null) {
-			for (String unique : localVariables) {
+		if (methodLocalVariables != null) {
+			for (String unique : methodLocalVariables) {
 				Variable lastReference = null;
 				for (Variable var : variables) {
 					if (var.toString().equals(unique)) {
@@ -189,7 +189,7 @@ public class AOIS extends Arithmetic_OP {
 		isInsideAReturnStatement = false;
 	}
 
-	ArrayList<String> localVariables = new ArrayList<String>();
+	ArrayList<String> methodLocalVariables = new ArrayList<String>();
 
 	@Override
 	public void visit(MethodDeclaration p) throws ParseTreeException {
@@ -199,7 +199,7 @@ public class AOIS extends Arithmetic_OP {
 		}
 
 		isInsideAMethod = true;
-		localVariables = new ArrayList<String>();
+		methodLocalVariables = new ArrayList<String>();
 		ArrayList<Variable> variables = new ArrayList<Variable>();
 		StatementList stmtList = p.getBody();
 		// add parameters as local variables
@@ -207,7 +207,7 @@ public class AOIS extends Arithmetic_OP {
 		if (paramList != null && paramList.size() > 0) {
 			for (int i = 0; i < paramList.size(); i++) {
 				Parameter param = paramList.get(0);
-				localVariables.add(param.getVariable());
+				methodLocalVariables.add(param.getVariable());
 			}
 		}
 		if (stmtList != null && stmtList.size() > 0) {
@@ -215,17 +215,17 @@ public class AOIS extends Arithmetic_OP {
 				Statement stmt = stmtList.get(i);
 				if (stmt instanceof VariableDeclaration) {
 					VariableDeclaration vd = (VariableDeclaration) stmt;
-					localVariables.add(vd.getVariable());
+					methodLocalVariables.add(vd.getVariable());
 				}
 
-				if (stmt instanceof NonLeaf) {
+				if (stmt instanceof NonLeaf) { // verificar todos os usos da variavel
 					NonLeaf nl = (NonLeaf) stmt;
 					checkVariables(nl.getContents(), variables);
 				}
 			}
 		}
 
-		for (String unique : localVariables) {
+		for (String unique : methodLocalVariables) {
 			Variable lastReference = null;
 			for (Variable var : variables) {
 				if (var.toString().equals(unique)) {
@@ -236,27 +236,65 @@ public class AOIS extends Arithmetic_OP {
 		}
 
 		super.visit(p);
-		localVariables = null;
+		methodLocalVariables = null;
 		isInsideAMethod = false;
+	}
+
+	private ArrayList<String> loopLocalVariables = new ArrayList<String>();
+
+	private void visitingLoops(StatementList stmtList) {
+		ArrayList<Variable> variables = new ArrayList<Variable>();
+		loopLocalVariables = new ArrayList<String>();
+		// Add variables declared inside a loop
+		if (stmtList != null && stmtList.size() > 0) {
+			for (int i = 0; i < stmtList.size(); i++) {
+				Statement stmt = stmtList.get(i);
+				if (stmt instanceof VariableDeclaration) {
+					VariableDeclaration vd = (VariableDeclaration) stmt;
+					loopLocalVariables.add(vd.getVariable());
+				}
+				// Adiciona todos os usos da variavel
+				if (stmt instanceof NonLeaf) { 
+					NonLeaf nl = (NonLeaf) stmt;
+					checkVariables(nl.getContents(), variables);
+				}
+			}
+		}
+
+		for (String unique : loopLocalVariables) {
+			Variable lastReference = null;
+			for (Variable var : variables) {
+				if (var.toString().equals(unique)) {
+					lastReference = var;
+				}
+			}
+			lastReferenceOfAVariableInLoop.add(lastReference);
+		}
 	}
 
 	@Override
 	public void visit(ForStatement p) throws ParseTreeException {
 		isInsideALoop.push(true);
+		visitingLoops(p.getStatements());
 		super.visit(p);
+
 		isInsideALoop.pop();
 	}
 
 	@Override
 	public void visit(WhileStatement p) throws ParseTreeException {
-		isInsideALoop.push(true);
+		isInsideALoop.push(true);	
+		visitingLoops(p.getStatements());
 		super.visit(p);
+		loopLocalVariables = null;
+
 		isInsideALoop.pop();
 	}
 
 	@Override
 	public void visit(DoWhileStatement p) throws ParseTreeException {
 		isInsideALoop.push(true);
+		visitingLoops(p.getStatements());
 		super.visit(p);
 		isInsideALoop.pop();
 	}
@@ -322,7 +360,7 @@ public class AOIS extends Arithmetic_OP {
 
 		contextInfo.setBefore(original_var.toString());
 		contextInfo.setAfter(mutant);
-		
+
 		try {
 			PrintWriter out = getPrintWriter(f_name);
 			AOIS_Writer writer = new AOIS_Writer(mutant_dir, out);
@@ -339,9 +377,9 @@ public class AOIS extends Arithmetic_OP {
 			e.printStackTrace();
 		}
 	}
-	
-	private void astContext(){
-		
+
+	private void astContext() {
+
 	}
 
 	/**
@@ -378,6 +416,17 @@ public class AOIS extends Arithmetic_OP {
 					}
 				}
 			}
+			if (isInsideAMethod && !isInsideALoop.isEmpty()) {
+				if (mutation == AOISMutations.POSINCREMENT_INSERTION
+						|| mutation == AOISMutations.POSDECREMENT_INSERTION) {
+					if (lastReferenceOfAVariableInLoop.contains(original)) {
+						String desc = original.toFlattenString() + " => " + mutant.toFlattenString();
+						logReduction("AOIS", desc);
+						return LogReduction.AVOID;
+					}
+				}
+			}
+
 			// #Rule 2: Is correct applying mutation operator in ThrowStatement?
 			// if(isInsideAThrowStatement){
 			// return true;

@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2015  the original author or authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,40 +15,42 @@
  */
 package mujava.op.basic;
 
-import openjava.mop.*;
+import openjava.mop.FileEnvironment;
 import openjava.ptree.*;
-import java.io.*;
+
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * <p>
  * Generate AODU (Arithmetic Operator Deletion (Unary)) mutants -- delete a
  * unary operator (arithmetic -) before each variable or expression
  * </p>
- * 
+ *
  * @author Yu-Seung Ma
  * @version 1.0
- * 
+ *
  *          Taking out aor_flag for not clear about the reason of using it. Lin
  *          Deng, Aug 23
- * 
+ *
  */
 
 public class AODU extends Arithmetic_OP {
-	// boolean aor_flag = false;
+  // boolean aor_flag = false;
 
-	public AODU(FileEnvironment file_env, ClassDeclaration cdecl, CompilationUnit comp_unit) {
-		super(file_env, comp_unit);
-	}
+  public AODU(FileEnvironment file_env, ClassDeclaration cdecl, CompilationUnit comp_unit) {
+	super(file_env, comp_unit);
+  }
 
-	/**
-	 * Set AOR flag
-	 * 
-	 * @param b
-	 */
-	// public void setAORflag(boolean b)
-	// {
-	// aor_flag = b;
-	// }
+  /**
+   * Set AOR flag
+   *
+   * @param b
+   */
+  // public void setAORflag(boolean b)
+  // {
+  // aor_flag = b;
+  // }
 
 //	public void visit(BinaryExpression p) throws ParseTreeException {
 //		// Examine equivalent
@@ -65,53 +67,52 @@ public class AODU extends Arithmetic_OP {
 //			}
 //		}
 //	}
+  public void visit(AssignmentExpression p) throws ParseTreeException {
+	// [ Example ]
+	// int a=0;int b=2;int c=4;
+	// Right Expression : a = b = -c;
+	// Wrong Expression : a = -b = c;
+	// Ignore left expression
+	Expression rexp = p.getRight();
+	rexp.accept(this);
+  }
 
-	public void visit(AssignmentExpression p) throws ParseTreeException {
-		// [ Example ]
-		// int a=0;int b=2;int c=4;
-		// Right Expression : a = b = -c;
-		// Wrong Expression : a = -b = c;
-		// Ignore left expression
-		Expression rexp = p.getRight();
-		rexp.accept(this);
+  public void visit(UnaryExpression p) throws ParseTreeException {
+	if (isArithmeticType(p)) {
+	  int op = p.getOperator();
+	  if ((op == UnaryExpression.MINUS) || (op == UnaryExpression.PLUS)) {
+		outputToFile(p);
+	  }
 	}
+  }
 
-	public void visit(UnaryExpression p) throws ParseTreeException {
-		if (isArithmeticType(p)) {
-			int op = p.getOperator();
-			if ((op == UnaryExpression.MINUS) || (op == UnaryExpression.PLUS)) {
-				outputToFile(p);
-			}
-		}
+  /**
+   * Write AODU mutants to files
+   *
+   * @param original
+   */
+  public void outputToFile(UnaryExpression original) {
+	if (comp_unit == null)
+	  return;
+
+	String f_name;
+	num++;
+	f_name = getSourceName("AODU");
+	String mutant_dir = getMuantID("AODU");
+
+	try {
+	  PrintWriter out = getPrintWriter(f_name);
+	  AODU_Writer writer = new AODU_Writer(mutant_dir, out);
+	  writer.setMutant(original);
+	  writer.setMethodSignature(currentMethodSignature);
+	  comp_unit.accept(writer);
+	  out.flush();
+	  out.close();
+	} catch (IOException e) {
+	  System.err.println("fails to create " + f_name);
+	} catch (ParseTreeException e) {
+	  System.err.println("errors during printing " + f_name);
+	  e.printStackTrace();
 	}
-
-	/**
-	 * Write AODU mutants to files
-	 * 
-	 * @param original
-	 */
-	public void outputToFile(UnaryExpression original) {
-		if (comp_unit == null)
-			return;
-
-		String f_name;
-		num++;
-		f_name = getSourceName("AODU");
-		String mutant_dir = getMuantID("AODU");
-
-		try {
-			PrintWriter out = getPrintWriter(f_name);
-			AODU_Writer writer = new AODU_Writer(mutant_dir, out);
-			writer.setMutant(original);
-			writer.setMethodSignature(currentMethodSignature);
-			comp_unit.accept(writer);
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			System.err.println("fails to create " + f_name);
-		} catch (ParseTreeException e) {
-			System.err.println("errors during printing " + f_name);
-			e.printStackTrace();
-		}
-	}
+  }
 }
