@@ -17,7 +17,6 @@ package mujava.op.basic;
 
 import mujava.op.util.ExpressionAnalyzer;
 import mujava.op.util.LogReduction;
-import mujava.util.Debug;
 import mujava.util.drule.DRuleUtils;
 import openjava.mop.FileEnvironment;
 import openjava.ptree.*;
@@ -44,7 +43,7 @@ public class ROR extends Arithmetic_OP {
   private boolean d_ror66_flag = false;
 
   public enum RORMutations {
-	CONDITIONAL_EXPRESSION_AFFIRMATION, CONDITIONAL_EXPRESSION_NEGATION;
+	CONDITIONAL_EXPRESSION_AFFIRMATION, CONDITIONAL_EXPRESSION_NEGATION
   }
 
   private List<String> allOperatorsSelected;
@@ -670,7 +669,7 @@ public class ROR extends Arithmetic_OP {
 	  //Check if initializer is int
 	  TypeName typeName = (TypeName) forStatementContents[0];
 	  boolean hasForStatementSpecs = false;
-	  if (typeName.getName() == "int") {
+	  if ((typeName != null) && (typeName.getName() != null) && typeName.getName().equals("int")) {
 		// Here, we look into for increment expression list for an unary increment
 		// on the variable we're interested into
 		ExpressionList expressionList = (ExpressionList) forStatementContents[4];
