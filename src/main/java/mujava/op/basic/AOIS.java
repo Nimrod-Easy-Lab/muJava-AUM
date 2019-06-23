@@ -45,6 +45,7 @@ import openjava.ptree.StatementList;
 import openjava.ptree.UnaryExpression;
 import openjava.ptree.Variable;
 import openjava.ptree.VariableDeclaration;
+import openjava.ptree.VariableDeclarator;
 import openjava.ptree.WhileStatement;
 
 /**
@@ -184,6 +185,18 @@ public class AOIS extends Arithmetic_OP {
 				lastReferenceOfAVariableInReturn.add(lastReference);
 			}
 		}
+		
+		if (loopLocalVariables != null) {
+			for (String unique : loopLocalVariables) {
+				Variable lastReference = null;
+				for (Variable var : variables) {
+					if (var.toString().equals(unique)) {
+						lastReference = var;
+					}
+				}
+				lastReferenceOfAVariableInReturn.add(lastReference);
+			}
+		}
 
 		super.visit(p);
 		isInsideAReturnStatement = false;
@@ -206,7 +219,7 @@ public class AOIS extends Arithmetic_OP {
 		ParameterList paramList = p.getParameters();
 		if (paramList != null && paramList.size() > 0) {
 			for (int i = 0; i < paramList.size(); i++) {
-				Parameter param = paramList.get(0);
+				Parameter param = paramList.get(i);
 				methodLocalVariables.add(param.getVariable());
 			}
 		}
@@ -242,9 +255,17 @@ public class AOIS extends Arithmetic_OP {
 
 	private ArrayList<String> loopLocalVariables = new ArrayList<String>();
 
-	private void visitingLoops(StatementList stmtList) {
+	private void visitingLoops(StatementList stmtList, VariableDeclarator[] variableDeclarators) {
 		ArrayList<Variable> variables = new ArrayList<Variable>();
 		loopLocalVariables = new ArrayList<String>();
+		
+		//add variables declared in the loop expression (like for initialization)
+		if(variableDeclarators != null && variableDeclarators.length > 0) {
+			for (VariableDeclarator vd : variableDeclarators) {
+				loopLocalVariables.add(vd.getVariable());
+			}
+		}		
+		
 		// Add variables declared inside a loop
 		if (stmtList != null && stmtList.size() > 0) {
 			for (int i = 0; i < stmtList.size(); i++) {
@@ -275,7 +296,7 @@ public class AOIS extends Arithmetic_OP {
 	@Override
 	public void visit(ForStatement p) throws ParseTreeException {
 		isInsideALoop.push(true);
-		visitingLoops(p.getStatements());
+		visitingLoops(p.getStatements(), p.getInitDecls());
 		super.visit(p);
 
 		isInsideALoop.pop();
@@ -284,9 +305,9 @@ public class AOIS extends Arithmetic_OP {
 	@Override
 	public void visit(WhileStatement p) throws ParseTreeException {
 		isInsideALoop.push(true);	
-		visitingLoops(p.getStatements());
+		visitingLoops(p.getStatements(), null);
 		super.visit(p);
-		loopLocalVariables = null;
+//		loopLocalVariables = null;
 
 		isInsideALoop.pop();
 	}
@@ -294,7 +315,7 @@ public class AOIS extends Arithmetic_OP {
 	@Override
 	public void visit(DoWhileStatement p) throws ParseTreeException {
 		isInsideALoop.push(true);
-		visitingLoops(p.getStatements());
+		visitingLoops(p.getStatements(), null);
 		super.visit(p);
 		isInsideALoop.pop();
 	}
