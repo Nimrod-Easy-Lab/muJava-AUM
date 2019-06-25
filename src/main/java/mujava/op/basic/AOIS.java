@@ -260,11 +260,11 @@ public class AOIS extends Arithmetic_OP {
 		loopLocalVariables = new ArrayList<String>();
 		
 		//add variables declared in the loop expression (like for initialization)
-		if(variableDeclarators != null && variableDeclarators.length > 0) {
-			for (VariableDeclarator vd : variableDeclarators) {
-				loopLocalVariables.add(vd.getVariable());
-			}
-		}		
+//		if(variableDeclarators != null && variableDeclarators.length > 0) {
+//			for (VariableDeclarator vd : variableDeclarators) {
+//				loopLocalVariables.add(vd.getVariable());
+//			}
+//		}		
 		
 		// Add variables declared inside a loop
 		if (stmtList != null && stmtList.size() > 0) {
