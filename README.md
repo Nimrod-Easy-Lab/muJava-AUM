@@ -21,33 +21,24 @@ Requirements
 
 Getting started
 ----------------
-#### Setting up MuJava-AUM
+#### Generating muJava executable from sources
 1. Clone MuJava-AUM:
     - `git clone https://github.com/easy-software-ufal/muJava-AUM.git`
 
-2. Initialize MuJava-AUM (install the dependencies into your local maven repository):
+2. Generate jar:
     - `cd MuJava-AUM`
-    - `mvn install:install-file -Dfile=lib/tools.jar -DgroupId=com.sun  -DartifactId=tools -Dversion=1.7.0.13 -Dpackaging=jar`
-    - `mvn install:install-file -Dfile=lib/openjava.jar -DgroupId=ojc.openjava  -DartifactId=ojc-openjava -Dversion=1.0 -Dpackaging=jar`
-    
-    - `mvn compile`
-
+    - `mvn package`
+    
+Jar files with dependencies and without (`.jar`) should be available under `target` folder (inside muJava-AUM folder).
 
 #### Using MuJava-AUM
-5. Change the file mujava.config to point out to examples/session1/ folder
+5. Create a file named mujava.config and add one line in following fashion, to point out to examples/session1/ folder (or other subject). This file should be located under your current path. For instance, for UNIX systems, it should be under the folder the output of `pwd` command points to.
     - `MuJava_HOME=<absolute-path>/muJava-AUM/examples/session1`
 6. Compile the source files from examples/session1/src/ directory
     - `javac examples/session1/src/*.java -d examples/session1/classes/`
-
-7. Execute the main file:
-    - `mvn exec:java -Dexec.mainClass="mujava.gui.GenMutantsMain"`
-
-#### Generating jar
-
-First, in `src/test/resources/mutants/session`, make the folders (if not exists): classes, result, src and testset.
-
-After that, run: `mvn install`. The jar will be in *target* folder, with *jar-with-dependencies.jar* appended.
-
+7. Execute muJava:
+    - `java -jar muJava.jar`
+    - Notice that if you have generated the Jar file from sources, you should be using the -with-dependencies version, for example `java -jar muJava-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
 Publications
 ------------------
