@@ -21,7 +21,7 @@ Requirements
 
 Getting started
 ----------------
-1. Download Jar file from [Releases](https://github.com/easy-software-ufal/muJava-AUM/releases) or generate it from sources.
+1.  [Download latest Jar file released](https://github.com/easy-software-ufal/muJava-AUM/releases) or generate it from sources.
 
 #### Generating muJava executable from sources
 1. Clone MuJava-AUM:
