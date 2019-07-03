@@ -33,7 +33,12 @@ Jar files with dependencies and without (`.jar`) should be available under `targ
 
 #### Using MuJava-AUM
 5. Create a file named mujava.config and add one line in following fashion, to point out to examples/session1/ folder (or other subject). This file should be located under your current path. For instance, for UNIX systems, it should be under the folder the output of `pwd` command points to.
+
     - `MuJava_HOME=<absolute-path>/muJava-AUM/examples/session1`
+
+For examples on how to provide muJava-friendly subjects, please see https://github.com/pmop/muJava-AUM-DummyCode.
+Notice that if you're on Windows, paths are separated by '\' instead of '/'.
+
 6. Compile the source files from examples/session1/src/ directory
     - `javac examples/session1/src/*.java -d examples/session1/classes/`
 7. Execute muJava:
