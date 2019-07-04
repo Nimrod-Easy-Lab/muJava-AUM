@@ -34,15 +34,24 @@ Getting started
 Jar files with dependencies and without (`.jar`) should be available under `target` folder (inside muJava-AUM folder).
 
 #### Using MuJava-AUM
-5. Create a file named mujava.config and add one line in following fashion, to point out to examples/session1/ folder (or other subject). This file should be located under your current path. For instance, for UNIX systems, it should be under the folder the output of `pwd` command points to.
+5. Create a file named mujava.config and add one line in the following fashion, pointing to a subject Java project you desire to mutate. This file should be placed under your current path, where you're executing muJava from (for Linux/MacOS/BSD, see `pwd` output, for Windows, see `echo %cd%`).
 
-    - `MuJava_HOME=<absolute-path>/muJava-AUM/examples/session1`
+    - `MuJava_HOME=<absolute-path-to-desired-folder>`
 
-For examples on how to provide muJava-friendly subjects, please see https://github.com/pmop/muJava-AUM-DummyCode.
-Notice that if you're on Windows, paths are separated by '\' instead of '/'.
+Example (**Linux/MacOS**):
 
-6. Compile the source files from examples/session1/src/ directory
-    - `javac examples/session1/src/*.java -d examples/session1/classes/`
+`MuJava_HOME=/home/exampleuser/Documents/muJava-AUM/examples/session1`
+
+Example (**Windows**):
+
+`MuJava_HOME=C:\Users\exampleuser\Documents\muJava-AUM\examples\session1`
+
+[See more examples on how to provide muJava with muJava-friendly projects as input here.](https://github.com/pmop/muJava-AUM-DummyCode)
+
+Notice that if you're on Windows, paths are separated by **\\** instead of **/** .
+
+6. Compile the source files from examples/session1/src/ directory:
+    - `javac examples/session1/src/*.java -d examples/session1/classes/`
 7. Execute muJava:
     - `java -jar muJava.jar`
     - Notice that if you have generated the Jar file from sources, you should be using the -with-dependencies version, for example `java -jar muJava-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
